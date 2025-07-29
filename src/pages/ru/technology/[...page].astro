@@ -21,4 +21,4 @@ export async function getStaticPaths({paginate}) {
 
 const {page} = Astro.props;
 ---
-<PostsList category="Технологии" title={`${SITE_CONFIG.title}: Посты о технологиях`} description="Последние посты о технологиях, программировании и разработке" page={page} allPosts={page.data} /> 
+<PostsList category="Технологии" title={`${SITE_CONFIG.title.ru}: Посты о технологиях`} description="Последние посты о технологиях, программировании и разработке" page={page} allPosts={page.data} /> 

@@ -15,7 +15,10 @@
 
 export default {
   // Basic site information
-  title: "Morethan-Log",
+  title: {
+    en: "Morethan-Log",
+    ru: "Morethan-Log"
+  },
   description: {
     en: "A modern blog template built with Astro - fast, responsive, and multilingual",
     ru: "Современный шаблон блога на Astro - быстрый, адаптивный и многоязычный"

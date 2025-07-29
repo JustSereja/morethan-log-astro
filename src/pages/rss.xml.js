@@ -211,7 +211,7 @@ export async function GET() {
      xmlns:dc="http://purl.org/dc/elements/1.1/"
      xmlns:media="http://search.yahoo.com/mrss/">
     <channel>
-        <title>${escapeXml(SITE_CONFIG.title)}</title>
+        <title>${escapeXml(SITE_CONFIG.title[defaultLang] || SITE_CONFIG.title.en)}</title>
         <link>${SITE_CONFIG.siteUrl}/</link>
         <description>${escapeXml(SITE_CONFIG.description[defaultLang])}</description>
         <language>${defaultLang}</language>
@@ -221,7 +221,7 @@ export async function GET() {
         <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
         <image>
             <url>${getRssLogoUrl()}</url>
-            <title>${escapeXml(SITE_CONFIG.title)}</title>
+            <title>${escapeXml(SITE_CONFIG.title[defaultLang] || SITE_CONFIG.title.en)}</title>
             <link>${SITE_CONFIG.siteUrl}/</link>
             <width>144</width>
             <height>144</height>

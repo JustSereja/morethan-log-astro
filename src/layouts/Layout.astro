@@ -161,17 +161,17 @@ const hreflangRuUrl = hreflang_ru ? `${baseDomain}${ensureTrailingSlash(hreflang
     <!-- Остальные мета-теги и элементы -->
 
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content={title || SITE_CONFIG.title}/>
+    <meta property="og:title" content={title || SITE_CONFIG.title[lang] || SITE_CONFIG.title.en}/>
     <meta property="og:description" content={description || t('ui.description')}/>
     <meta property="og:url" content={canonicalUrl}/>
     <meta property="og:image" content={image ? image : `${baseDomain}${SITE_CONFIG.seo.defaultImage}`}/>
     <meta property="og:type" content="website"/>
     <meta property="og:locale" content={lang === 'ru' ? 'ru_RU' : 'en_US'}/>
-    <meta property="og:site_name" content={SITE_CONFIG.title}/>
+    <meta property="og:site_name" content={SITE_CONFIG.title[lang] || SITE_CONFIG.title.en}/>
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image"/>
-    <meta name="twitter:title" content={title || SITE_CONFIG.title}/>
+    <meta name="twitter:title" content={title || SITE_CONFIG.title[lang] || SITE_CONFIG.title.en}/>
     <meta name="twitter:description" content={description || t('ui.description')}/>
     <meta name="twitter:image" content={image ? image : `${baseDomain}${SITE_CONFIG.seo.defaultImage}`}/>
     {SITE_CONFIG.seo.twitterHandle && <meta name="twitter:site" content={`@${SITE_CONFIG.seo.twitterHandle}`}/>}
@@ -198,13 +198,13 @@ const hreflangRuUrl = hreflang_ru ? `${baseDomain}${ensureTrailingSlash(hreflang
     {SITE_CONFIG.features.rss && (
         <>
             {/* Main RSS feed (default language) */}
-            <link rel="alternate" type="application/rss+xml" href="/rss.xml" title={`${SITE_CONFIG.title} RSS Feed`} />
+            <link rel="alternate" type="application/rss+xml" href="/rss.xml" title={`${SITE_CONFIG.title[SITE_CONFIG.defaultLanguage] || SITE_CONFIG.title.en} RSS Feed`} />
             {/* Language-specific RSS feed */}
-            <link rel="alternate" type="application/rss+xml" href={`/${lang}/rss.xml`} title={`${SITE_CONFIG.title} - ${lang === 'en' ? 'English' : 'Russian'} RSS Feed`} />
+            <link rel="alternate" type="application/rss+xml" href={`/${lang}/rss.xml`} title={`${SITE_CONFIG.title[lang] || SITE_CONFIG.title.en} - ${lang === 'en' ? 'English' : 'Russian'} RSS Feed`} />
             {/* Alternative language RSS feed */}
             {lang === 'en' 
-                ? <link rel="alternate" type="application/rss+xml" href="/ru/rss.xml" hreflang="ru" title={`${SITE_CONFIG.title} - Russian RSS Feed`} />
-                : <link rel="alternate" type="application/rss+xml" href="/en/rss.xml" hreflang="en" title={`${SITE_CONFIG.title} - English RSS Feed`} />
+                ? <link rel="alternate" type="application/rss+xml" href="/ru/rss.xml" hreflang="ru" title={`${SITE_CONFIG.title.ru || SITE_CONFIG.title.en} - Russian RSS Feed`} />
+                : <link rel="alternate" type="application/rss+xml" href="/en/rss.xml" hreflang="en" title={`${SITE_CONFIG.title.en} - English RSS Feed`} />
             }
         </>
     )}
@@ -228,7 +228,7 @@ const hreflangRuUrl = hreflang_ru ? `${baseDomain}${ensureTrailingSlash(hreflang
 <body>
 <header class="header">
     <div class="cont flex">
-        <div class="header__text-logo"><a href={ensureTrailingSlash(`/${lang === 'en' ? '' : lang}`)} class="header__text-logo">{SITE_CONFIG.title}</a></div>
+        <div class="header__text-logo"><a href={ensureTrailingSlash(`/${lang === 'en' ? '' : lang}`)} class="header__text-logo">{SITE_CONFIG.title[lang] || SITE_CONFIG.title.en}</a></div>
 
         <div class="header__nav">
             {SITE_CONFIG.features.darkMode && (
