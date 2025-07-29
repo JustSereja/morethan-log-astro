@@ -1,0 +1,32 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+// i18n
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
+import SITE_CONFIG from '../site.config';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+---
+<Layout title={t('ui.not_found')} description={t('ui.not_found')} lang={lang}>
+    <div class="sect404">
+        <div class="sect404__wrapper">
+            <div class="sect404__top">
+                <div>4</div>
+                <span class="icon">🤔</span>
+                <div>4</div>
+            </div>
+
+            <div class="sect404__text">{t('ui.not_found')}</div>
+            <div class="article__category category">
+                <div class="category__item category__item--light-blue">
+                    <a class="category__item category__item--light-blue" href={translatePath('/')}>
+                        💻 {SITE_CONFIG.title}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</Layout>

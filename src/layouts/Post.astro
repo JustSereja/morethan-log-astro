@@ -1,0 +1,176 @@
+---
+import Layout from "./Layout.astro";
+import { promises as fs } from 'fs';
+import { marked } from 'marked';
+import * as path from "node:path";
+import { ensureTrailingSlash } from '../utils/url';
+
+const {title, h1, date, custom_category, hreflang_ru, hreflang_en, image} = Astro.props.frontmatter;
+// i18n
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
+import SITE_CONFIG from '../site.config';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+function extractCategoryFromUrl(url) {
+    const match = url.match(/\/(?:ru\/)?([^\/]+)\/.*/);
+    return match ? match[1] : null;
+}
+
+const category = custom_category ?? extractCategoryFromUrl(Astro.props.url);
+
+async function setup() {
+    const baseDirectory = lang === 'ru' ? 'src/pages/ru' : 'src/pages';
+    let postPath = Astro.url.pathname;
+    
+    // Remove language prefix if present
+    if (lang === 'ru') {
+        postPath = postPath.replace('/ru', '');
+    }
+    
+    // Remove trailing slash and add .md extension
+    postPath = postPath.replace(/\/$/, '');
+    const markdownPath = path.join(baseDirectory + postPath + '.md');
+    
+    let markdownContent = '';
+    try {
+        markdownContent = await fs.readFile(markdownPath, 'utf-8');
+    } catch (err) {
+        // Silently handle error
+    }
+
+    return {
+        markdownContent,
+    };
+}
+
+const { markdownContent } = await setup();
+
+const extractFirstImage = (markdown) => {
+    const tokens = marked.lexer(markdown);
+    for (const token of tokens) {
+        if (token.type === 'image') {
+            return token.href;
+        } else if (token.type === 'paragraph' && token.text.includes('![](')) {
+            const matches = token.text.match(/!\[.*?\]\((.*?)\)/);
+            if (matches && matches[1]) {
+                return matches[1];
+            }
+        }
+    }
+    return false;
+};
+
+const firstImage = extractFirstImage(markdownContent);
+---
+<Layout title={title || h1}
+        hreflang_en={hreflang_en} hreflang_ru={hreflang_ru}
+        image={image ?? firstImage}>
+    <div class="article-wrap">
+        <div class="article">
+            <article>
+                <div class="article__head">
+                    <h1 class="h1">{h1}</h1>
+
+                    <div class="article__nav">
+                        <div class="article__nav-top">
+                            <div class="article__author author">
+                                <div class="author__photo">
+                                    <a href="/about">
+                                        <picture>
+                                            <img src="/img/avatar.svg" alt={t('name')}>
+                                        </picture>
+                                    </a>
+                                </div>
+
+                                <div class="author__name"><a href={translatePath('/about')} class="author__name">{t('name')}</a></div>
+                            </div>
+
+                            {date &&
+                            <div class="article__date">{date}</div>}
+
+                            {t(`ui.${category}` as any) && <div><a class="category__item category__item--light-blue" href={ensureTrailingSlash(`/${lang === 'en' ? category : lang + '/' + category }`)}>💻 {t(`ui.${category}` as any)}</a></div>}
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-block article__text-block">
+                    <slot/>
+                </div>
+
+                <div class="post-navigation">
+                    <a href={translatePath('/')}>← {t('ui.back')}</a>
+                    <a href="#" class="scroll-top">↑ {t('ui.top')}</a>
+                </div>
+            </article>
+        </div>
+    </div>
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <span class="close">&times;</span>
+        <img class="lightbox-content">
+    </div>
+    <script is:inline define:vars={{ siteUrl: SITE_CONFIG.siteUrl }}>
+        window.closeLightbox = function() {
+            document.getElementById("lightbox").style.display = "none";
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const links = document.querySelectorAll('a');
+
+            links.forEach(link => {
+                const href = link.getAttribute('href');
+
+                if (!href.startsWith(siteUrl) && !href.startsWith('/') && !href.startsWith('#')) {
+                    link.setAttribute('target', '_blank');
+                    link.setAttribute('rel', 'noopener noreferrer');
+                }
+            });
+            document.querySelectorAll("img").forEach(function(img) {
+                img.onclick = function() {
+                    var lightboxImage = document.querySelector(".lightbox-content");
+                    lightboxImage.src = this.src;
+                    document.getElementById("lightbox").style.display = "flex";
+                };
+            });
+
+        });
+    </script>
+</Layout>
+
+<style>
+    .lightbox {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .lightbox-content {
+        margin: auto;
+        display: block;
+        max-width: 100%;
+        max-height: 80%;
+        border-radius: 5px;
+        cursor: zoom-out;
+    }
+
+    .close {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+</style>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <defs>
+    <linearGradient id="blogGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" fill="url(#blogGrad)"/>
+  <g transform="translate(400, 200)">
+    <rect x="-60" y="-40" width="120" height="80" rx="4" fill="white" opacity="0.9"/>
+    <rect x="-50" y="-30" width="100" height="4" rx="2" fill="#4F46E5"/>
+    <rect x="-50" y="-20" width="80" height="4" rx="2" fill="#4F46E5" opacity="0.7"/>
+    <rect x="-50" y="-10" width="90" height="4" rx="2" fill="#4F46E5" opacity="0.7"/>
+    <rect x="-50" y="0" width="70" height="4" rx="2" fill="#4F46E5" opacity="0.7"/>
+    <rect x="-50" y="10" width="85" height="4" rx="2" fill="#4F46E5" opacity="0.7"/>
+    <rect x="-50" y="20" width="75" height="4" rx="2" fill="#4F46E5" opacity="0.7"/>
+  </g>
+  <text x="400" y="340" font-family="system-ui" font-size="24" font-weight="600" fill="white" text-anchor="middle" opacity="0.8">Blog Post</text>
+</svg>

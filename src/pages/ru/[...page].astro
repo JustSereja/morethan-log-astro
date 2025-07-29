@@ -1,0 +1,23 @@
+---
+import PostsList from "../../layouts/PostsList.astro";
+import {getPages} from "../../utils/getPages.js";
+import SITE_CONFIG from "../../site.config";
+
+export async function getStaticPaths({paginate}) {
+    let allPosts = [];
+    try {
+        const posts = import.meta.glob<{frontmatter: any}>('/src/pages/**/*.md', { eager: true });
+        allPosts = Object.entries(posts).map(([filepath, post]) => ({
+            ...post,
+            file: filepath
+        }));
+    } catch (error) {
+        console.error("No markdown files found:", error);
+    }
+    
+    const pages = getPages(allPosts, null, 'ru');
+    return paginate(pages, {pageSize: SITE_CONFIG.postsPerPage || 10});
+}
+const {page} = Astro.props;
+---
+<PostsList category="All Posts" title={`${SITE_CONFIG.title}: ${SITE_CONFIG.description.ru}`} description={SITE_CONFIG.author.bio.ru} page={page} allPosts={page.data} />

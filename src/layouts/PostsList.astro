@@ -1,0 +1,413 @@
+---
+import { promises as fs } from 'fs';
+import Layout from "./Layout.astro";
+import CategoriesList from "../components/CategoriesList.astro";
+import TagsList from "../components/TagsList.astro";
+import { marked } from 'marked';
+import SITE_CONFIG from '../site.config';
+import { ensureTrailingSlash } from '../utils/url';
+
+const extractFirstImage = (markdown) => {
+    const tokens = marked.lexer(markdown);
+    for (const token of tokens) {
+        if (token.type === 'image') {
+            return token.href;
+        } else if (token.type === 'paragraph' && token.tokens) {
+            // Check nested tokens inside paragraphs
+            for (const nestedToken of token.tokens) {
+                if (nestedToken.type === 'image') {
+                    return nestedToken.href;
+                }
+            }
+        }
+    }
+    return false;
+};
+
+const {title,
+    description,
+    keywords,
+    category,
+    type,
+    allPosts,
+    page} = Astro.props;
+// i18n
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
+
+// Helper to get social network display names
+const socialNetworkNames = {
+  github: 'GitHub',
+  twitter: 'Twitter',
+  linkedin: 'LinkedIn',
+  telegram: 'Telegram',
+  rss: 'RSS',
+  email: 'Email',
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  youtube: 'YouTube',
+  discord: 'Discord',
+  mastodon: 'Mastodon',
+  reddit: 'Reddit',
+  pinterest: 'Pinterest',
+  tumblr: 'Tumblr',
+  whatsapp: 'WhatsApp',
+  tiktok: 'TikTok',
+  twitch: 'Twitch'
+};
+
+// Helper to filter and format social links based on current language
+const getSocialLinks = (lang) => {
+  const links = [];
+  
+  // Always add RSS if enabled
+  if (SITE_CONFIG.features.rss) {
+    links.push({
+      key: 'rss',
+      name: 'RSS',
+      url: `/${lang}/rss.xml`
+    });
+  }
+  
+  // Add configured social links for the current language
+  const langSocialLinks = SITE_CONFIG.socialLinks?.[lang] || SITE_CONFIG.socialLinks?.en || {};
+  Object.entries(langSocialLinks).forEach(([key, url]) => {
+    if (url) {
+      links.push({
+        key,
+        name: socialNetworkNames[key] || key.charAt(0).toUpperCase() + key.slice(1),
+        url
+      });
+    }
+  });
+  
+  return links;
+};
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+const socialLinks = getSocialLinks(lang);
+
+function parseDate(dateStr) {
+    if (!dateStr) {
+        // Return current date if date is missing or invalid
+        return new Date();
+    }
+    const parts = dateStr.split('.');
+    if (parts.length !== 3) {
+        // If date doesn't match expected format, return current date
+        return new Date();
+    }
+    
+    // Check if format is YYYY.MM.DD or DD.MM.YYYY
+    let day, month, year;
+    if (parts[0].length === 4) {
+        // Format is YYYY.MM.DD
+        year = parseInt(parts[0], 10);
+        month = parseInt(parts[1], 10) - 1; // Months in JavaScript start from 0
+        day = parseInt(parts[2], 10);
+    } else {
+        // Format is DD.MM.YYYY
+        day = parseInt(parts[0], 10);
+        month = parseInt(parts[1], 10) - 1; // Months in JavaScript start from 0
+        year = parseInt(parts[2], 10);
+    }
+    
+    return new Date(year, month, day);
+}
+
+function extractCategoryFromUrl(url) {
+    const match = url.match(/\/(?:ru\/)?([^\/]+)\/.*/);
+    return match ? match[1] : null;
+}
+
+const postsWithData = await Promise.all(allPosts.map(async (post) => {
+    // Fix file path - construct proper path from the post.file
+    let filePath = post.file;
+    if (filePath.startsWith('/src/')) {
+        // Remove leading slash for relative path
+        filePath = filePath.substring(1);
+    } else if (filePath.startsWith('../pages/')) {
+        // Convert '../pages/blog/post.md' to 'src/pages/blog/post.md'
+        filePath = 'src/pages/' + filePath.substring('../pages/'.length);
+    } else if (!filePath.startsWith('src/')) {
+        // If it doesn't start with 'src/', prepend it
+        filePath = 'src/pages/' + filePath;
+    }
+    
+    const content = await fs.readFile(filePath, 'utf8');
+    const h1 = post.frontmatter.h1 || post.frontmatter.title;
+    const dateStr = post.frontmatter.date;
+    const date = parseDate(dateStr);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const dateFrontmatter = `${day}.${month}.${year}`;
+    const postCategory = extractCategoryFromUrl(post.url);
+    
+    // Determine image URL with category-specific fallback
+    let imageUrl = post.frontmatter.image ?? extractFirstImage(content);
+    if (!imageUrl) {
+        // Use category-specific placeholder
+        const placeholderMap = {
+            'blog': '/img/posts/placeholder-blog.svg',
+            'technology': '/img/posts/placeholder-technology.svg',
+            'projects': '/img/posts/placeholder-projects.svg'
+        };
+        imageUrl = placeholderMap[postCategory] || '/img/posts/placeholder.svg';
+    }
+    
+    return { ...post, h1, date, dateFrontmatter, imageUrl, announcement: post.frontmatter.announcement, postCategory };
+}));
+
+function countUniqueCategories(postsWithData) {
+    const categoriesSet = new Set();
+    postsWithData.forEach(post => {
+        if (post.postCategory) { // Make sure the post has a category
+            categoriesSet.add(post.postCategory);
+        }
+    });
+    return categoriesSet.size;
+}
+
+const showCategories = /^(?:\/(?:ru\/)?(?:\d+)?|\/(?:ru)?)$/.test(Astro.url.pathname) || countUniqueCategories(postsWithData) > 1;
+
+// Get slugs of all categories
+const registeredCategorySlugs = Object.keys(SITE_CONFIG.categories).filter(
+  key => SITE_CONFIG.categories[key].enabled
+);
+
+// Extract potential slug from URL
+function extractCategorySlugFromUrl(url) {
+    const match = url.match(/\/(?:ru\/)?([^\/]+)/);
+    // Find and return the slug if it matches one of the registered ones
+    if (match && registeredCategorySlugs.includes(match[1])) {
+        return match[1];
+    }
+    return null;
+}
+const categoryUrl = extractCategorySlugFromUrl(Astro.url.pathname);
+const categoryIcon = SITE_CONFIG.categories[categoryUrl] ? SITE_CONFIG.categories[categoryUrl].icon : '📂'
+const showPreviews = true; // Enable image previews
+---
+<Layout
+        title={title}
+        description={description}
+        keywords={keywords}
+        prevPageUrl={page.url.prev}
+        nextPageUrl={page.url.next}>
+    <div class="content">
+        <aside class="aside aside--left">
+            <div class="tags tags--desktop">
+                <div class="tags__top">
+                    <span class="icon">🏷️</span> {t('ui.categories')}
+                </div>
+                <CategoriesList/>
+                <!--<div class="tags__top">-->
+                <!--    <span class="icon">🏷️</span> Tags-->
+                <!--</div>-->
+                <!--<TagsList/>-->
+            </div>
+        </aside>
+        <div class="content-center">
+            <div class="profile profile--mob">
+                <div class="profile__title title">
+                    <span class="icon">💻</span> {t('ui.profile')}
+                </div>
+                <div class="profile__content">
+                    <div class="profile__content-top">
+                        <a href={translatePath('/about')}><img src="/img/avatar.svg" alt={t('name')}></a>
+                    </div>
+                    <div class="profile__content-mid">
+                        <!--<div class="profile__name">Ein</div>-->
+                        <!--<div class="profile__role">frontend developer</div>-->
+                        <div class="profile__text">{t('ui.description')}</div>
+                    </div>
+                </div>
+            </div>
+            <form class="search form" onsubmit="event.preventDefault();">
+                <div class="search__top">
+                    <span class="search__top-icon">🔎</span> {t('ui.search')}
+                </div>
+                <input type="text" class="input" placeholder={t('ui.search_placeholder')}>
+            </form>
+            <div id="search-results"></div>
+
+
+            <div class="tags tags--mob">
+                <div class="tags__top">
+                    <span class="icon">🏷️</span> {t('ui.categories')}
+                </div>
+                <CategoriesList/>
+            </div>
+            <div class="filter">
+                <div class="filter__categories categories">
+                    <div class="categories__wrapper">
+                        {categoryIcon} <h1 class="categories__wrapper">{category ?? 'All Posts'}</h1>
+                        <!--<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em"-->
+                        <!--     width="1em"xmlns="http://www.w3.org/2000/svg">-->
+                        <!--    <path fill="none" d="M0 0h24v24H0z"></path>-->
+                        <!--    <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"></path>-->
+                        <!--</svg>-->
+                    </div>
+                    <div class="categories__content"></div>
+                </div>
+                <!--<div class="filter__order">-->
+                <!--    <a data-active="true">Desc</a>-->
+                <!--    <a data-active="false">Asc</a>-->
+                <!--</div>-->
+            </div>
+            <div class="posts-list">
+                {postsWithData.length === 0 && <div class="no-posts">{t('ui.no_posts')}</div>}
+                {postsWithData.map((post) => (
+                        <a href={post.url} class="post">
+                            {showCategories && post.postCategory && SITE_CONFIG.categories[post.postCategory] && (
+                                    <div class="post__category category">
+                                        <div class="category__item category__item--light-blue">
+                                            {SITE_CONFIG.categories[post.postCategory].icon} {t(`ui.${post.postCategory}` as any)}
+                                        </div>
+                                    </div>
+                            )}
+
+                            <div class="post__date_right category">
+                                <div class="category__item date__item--light-blue">
+                                    {post.dateFrontmatter}
+                                </div>
+                            </div>
+
+                            {showPreviews && post.imageUrl &&
+                            <div class="post__thumbnail">
+                                <picture>
+                                    <!--<source srcset="/img/post_img.webp" type="image/webp">-->
+                                    <img src={post.imageUrl} alt="">
+                                </picture>
+                            </div>}
+
+                            <div class="post__content"> <!-- data-thumb={post.imageUrl ? "true" : "false"} -->
+                                <h2 class="post__title">{post.h1}</h2>
+                                 <!--<div class="post__date">{post.dateFrontmatter}</div>-->
+                                {post.announcement && <div class="post__summary">{post.announcement}</div>}
+                                <!--<div class="post__tags">-->
+                                <!--    <div class="post__tag">Next.js</div>-->
+                                <!--    <div class="post__tag">GraphQL</div>-->
+                                <!--    <div class="post__tag">Apollo</div>-->
+                                <!--</div>-->
+                            </div>
+                        </a>
+                ))}
+                <!--<a href="/" class="post">-->
+                <!--    <div class="post__category category">-->
+                <!--        <div class="category__item category__item&#45;&#45;light-blue">💻 Frontend</div>-->
+                <!--    </div>-->
+                <!--    <div class="post__thumbnail">-->
+                <!--        <picture>-->
+                <!--            <source srcset="/img/post_img.webp" type="image/webp">-->
+                <!--            <img src="/img/post_img.jpg" alt="">-->
+                <!--        </picture>-->
+                <!--    </div>-->
+                <!--    <div class="post__content" data-thumb="true">-->
+                <!--        <h2 class="post__title">Handling GraphQL queries in apollo client</h2>-->
+                <!--        <div class="post__date">Jun 25, 2022</div>-->
+                <!--        <div class="post__summary">Let's use GraphQL using apollo client</div>-->
+                <!--        <div class="post__tags">-->
+                <!--            <div class="post__tag">Next.js</div>-->
+                <!--            <div class="post__tag">GraphQL</div>-->
+                <!--            <div class="post__tag">Apollo</div>-->
+                <!--        </div>-->
+                <!--    </div>-->
+                <!--</a>-->
+
+                <!-- pagination -->
+                {page.lastPage > 1 && (
+                        <div class="pagination">
+                            {/* Display "Prev" link only if there's a previous page */}
+                            {page.url.prev ?
+                                    <a href={page.url.prev} class="pagination__link">{t('ui.prev')}</a> :
+                                    <span class="pagination__link disabled" style="visibility: hidden;">{t('ui.prev')}</span>
+                            }
+
+                            <span class="pagination__text">{page.currentPage} / {page.lastPage}</span>
+
+                            {/* Display "Next" link only if there's a next page */}
+                            {page.url.next ?
+                                    <a href={page.url.next} class="pagination__link">{t('ui.next')}</a> :
+                                    <span class="pagination__link disabled" style="visibility: hidden;">{t('ui.next')}</span>
+                            }
+                        </div>
+                )}
+            </div>
+                            <div class="footer footer--mob">
+                    <div class="footer__copy">
+Made with <span class="footer__heart">♥</span> by <a href="https://sereja.com/" target="_blank" rel="noopener noreferrer">Sereja</a> • {new Date().getFullYear()}
+                </div>
+            </div>
+        </div>
+        <aside class="aside aside--right">
+            <div class="profile profile--desktop">
+                <div class="profile__title title">
+                    <span class="icon">💻</span> {t('ui.profile')}
+                </div>
+                <div class="profile__content">
+                    <div class="profile__content-top">
+                        <a href={translatePath('/about')}>
+                            <img src="/img/avatar.svg" alt={t('name')}>
+                        </a>
+                    </div>
+                    <div class="profile__content-mid">
+                        <!--<div class="profile__name">Ein</div>-->
+                        <!--<div class="profile__role">frontend developer</div>-->
+                        <div class="profile__text">{t('ui.description')}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="service">
+                <div class="title service__title">
+                    <span class="icon">🌟</span> {t('ui.projects')}
+                </div>
+                <div class="box-links service__box-links">
+                    <a href="https://github.com/JustSereja/morethan-log-astro" target="_blank" rel="noreferrer" class="box-links__link">
+                        <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024" class="icon" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M511.6 76.3C264.3 76.2 64 276.4 64 523.5 64 718.9 189.3 885 363.8 946c23.5 5.9 19.9-10.8 19.9-22.2v-77.5c-135.7 15.9-141.2-73.9-150.3-88.9C215 726 171.5 718 184.5 703c30.9-15.9 62.4 4 98.9 57.9 26.4 39.1 77.9 32.5 104 26 5.7-23.5 17.9-44.5 34.7-60.8-140.6-25.2-199.2-111-199.2-213 0-49.5 16.3-95 48.3-131.7-20.4-60.5 1.9-112.3 4.9-120 58.1-5.2 118.5 41.6 123.2 45.3 33-8.9 70.7-13.6 112.9-13.6 42.4 0 80.2 4.9 113.5 13.9 11.3-8.6 67.3-48.8 121.3-43.9 2.9 7.7 24.7 58.3 5.5 118 32.4 36.8 48.9 82.7 48.9 132.3 0 102.2-59 188.1-200 212.9a127.5 127.5 0 0 1 38.1 91v112.5c.8 9 0 17.9 15 17.9 177.1-59.7 304.6-227 304.6-424.1 0-247.2-200.4-447.3-447.5-447.3z"></path>
+                        </svg>
+                        <span class="box-links__link-name">GitHub</span>
+                    </a>
+                </div>
+            </div>
+            <div class="contact">
+                <div class="title contact__title">
+                    <span class="icon">💬</span> {t('ui.contacts')}
+                </div>
+                <div class="box-links contact__box-links">
+                    <!--<a href="/" rel="noreferrer" target="_blank" class="box-links__link">-->
+                    <!--    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024" class="icon" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">-->
+                    <!--        <path d="M511.6 76.3C264.3 76.2 64 276.4 64 523.5 64 718.9 189.3 885 363.8 946c23.5 5.9 19.9-10.8 19.9-22.2v-77.5c-135.7 15.9-141.2-73.9-150.3-88.9C215 726 171.5 718 184.5 703c30.9-15.9 62.4 4 98.9 57.9 26.4 39.1 77.9 32.5 104 26 5.7-23.5 17.9-44.5 34.7-60.8-140.6-25.2-199.2-111-199.2-213 0-49.5 16.3-95 48.3-131.7-20.4-60.5 1.9-112.3 4.9-120 58.1-5.2 118.5 41.6 123.2 45.3 33-8.9 70.7-13.6 112.9-13.6 42.4 0 80.2 4.9 113.5 13.9 11.3-8.6 67.3-48.8 121.3-43.9 2.9 7.7 24.7 58.3 5.5 118 32.4 36.8 48.9 82.7 48.9 132.3 0 102.2-59 188.1-200 212.9a127.5 127.5 0 0 1 38.1 91v112.5c.8 9 0 17.9 15 17.9 177.1-59.7 304.6-227 304.6-424.1 0-247.2-200.4-447.3-447.5-447.3z"></path>-->
+                    <!--    </svg>-->
+                    <!--    <span class="box-links__link-name">github</span>-->
+                    <!--</a>-->
+                    <!--<a href="/" rel="noreferrer" target="_blank" class="box-links__link">-->
+                    <!--    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024" class="icon" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">-->
+                    <!--        <path d="M928 160H96c-17.7 0-32 14.3-32 32v640c0 17.7 14.3 32 32 32h832c17.7 0 32-14.3 32-32V192c0-17.7-14.3-32-32-32zm-40 110.8V792H136V270.8l-27.6-21.5 39.3-50.5 42.8 33.3h643.1l42.8-33.3 39.3 50.5-27.7 21.5zM833.6 232L512 482 190.4 232l-42.8-33.3-39.3 50.5 27.6 21.5 341.6 265.6a55.99 55.99 0 0 0 68.7 0L888 270.8l27.6-21.5-39.3-50.5-42.7 33.2z"></path>-->
+                    <!--    </svg>-->
+                    <!--    <span class="box-links__link-name">email</span>-->
+                    <!--</a>-->
+                    <!--<a href="/" rel="noreferrer" target="_blank" class="box-links__link">-->
+                    <!--    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024" class="icon" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">-->
+                    <!--        <path d="M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32zM349.3 793.7H230.6V411.9h118.7v381.8zm-59.3-434a68.8 68.8 0 1 1 68.8-68.8c-.1 38-30.9 68.8-68.8 68.8zm503.7 434H675.1V608c0-44.3-.8-101.2-61.7-101.2-61.7 0-71.2 48.2-71.2 98v188.9H423.7V411.9h113.8v52.2h1.6c15.8-30 54.5-61.7 112.3-61.7 120.2 0 142.3 79.1 142.3 181.9v209.4z"></path>-->
+                    <!--    </svg>-->
+                    <!--    <span class="box-links__link-name">linkedin</span>-->
+                    <!--</a>-->
+                    {socialLinks.map(({ name, url }) => (
+                            <a href={url} rel="noreferrer" target="_blank" class="box-links__link">
+                                <span class="box-links__link-name">{name}</span>
+                            </a>
+                    ))}
+                </div>
+            </div>
+                                <div class="footer footer--desktop">
+                        <div class="footer__copy">
+Made with <span class="footer__heart">♥</span> by <a href="https://sereja.com/" target="_blank" rel="noopener noreferrer">Sereja</a> • {new Date().getFullYear()}
+                </div>
+            </div>
+        </aside>
+    </div>
+</Layout>
