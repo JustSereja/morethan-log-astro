@@ -6,7 +6,7 @@ date: 29.07.2025
 custom_category: 'blog'
 hreflang_en: '/blog/typography-showcase/'
 hreflang_ru: '/ru/blog/typography-showcase/'
-
+AI: true
 announcement: 'Полная демонстрация всех возможных элементов контента и типографических стилей, доступных в этом блоге.'
 ---
 
