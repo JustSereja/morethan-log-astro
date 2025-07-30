@@ -4,8 +4,9 @@ import { promises as fs } from 'fs';
 import { marked } from 'marked';
 import * as path from "node:path";
 import { ensureTrailingSlash } from '../utils/url';
+import AIWarning from '../components/AIWarning.astro';
 
-const {title, h1, date, custom_category, hreflang_ru, hreflang_en, image} = Astro.props.frontmatter;
+const {title, h1, date, custom_category, hreflang_ru, hreflang_en, image, AI} = Astro.props.frontmatter;
 // i18n
 import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
 import SITE_CONFIG from '../site.config';
@@ -96,6 +97,8 @@ const firstImage = extractFirstImage(markdownContent);
                         </div>
                     </div>
                 </div>
+
+                {AI && <AIWarning />}
 
                 <div class="text-block article__text-block">
                     <slot/>

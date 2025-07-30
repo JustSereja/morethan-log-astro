@@ -1,0 +1,26 @@
+---
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<div class="ai-warning">
+    <p>🤖 {t('ui.ai_warning')}</p>
+</div>
+
+<style>
+    .ai-warning {
+        margin: 1rem 0;
+        padding: 1rem;
+        background-color: #fff8e6;
+        border: 1px solid #ffd700;
+        border-radius: 4px;
+    }
+
+    .ai-warning p {
+        margin: 0;
+        color: #664d03;
+        font-size: 0.9rem;
+    }
+</style> 
