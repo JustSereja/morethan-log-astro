@@ -4,6 +4,8 @@ A modern, customizable blog template built with Astro. Fast, responsive, and mul
 
 🌐 **[Live Demo](https://morethan-log-astro.sereja.com/)**
 
+![Morethan-Log Screenshot](screenshot.png)
+
 ## 🚀 Features
 
 - **🌍 Multilingual Support** - Built-in support for multiple languages (EN/RU by default)
@@ -24,42 +26,45 @@ A modern, customizable blog template built with Astro. Fast, responsive, and mul
 
 ### Installation
 
-1. **Use this template** (Recommended)
+1. **Quick Start with npm create** (Recommended)
    
-   Click the "Use this template" button on GitHub to create a new repository based on this template:
+   The easiest way to get started is using the Astro CLI:
+   
+   ```bash
+   npm create astro@latest -- --template JustSereja/morethan-log-astro
+   ```
+   
+   This command will:
+   - Prompt you for a project name
+   - Create a new directory with your blog
+   - Install all dependencies automatically
+   
+   Then navigate to your project:
+   ```bash
+   cd [your-project-name]
+   ```
+
+2. **Alternative: Use GitHub Template**
+   
+   If you prefer to create a GitHub repository first:
    
    [![Use this template](https://img.shields.io/badge/Use%20this%20template-2ea44f?style=for-the-badge)](https://github.com/JustSereja/morethan-log-astro/generate)
    
-   Or manually:
-   - Go to the [repository page](https://github.com/JustSereja/morethan-log-astro)
-   - Click the green "Use this template" button
-   - Choose "Create a new repository"
-   - Name your new repository and create it
-   
-   Then clone your new repository:
+   Then clone and set up:
    ```bash
-   git clone https://github.com/[your-username]/[your-blog-name].git
-   cd [your-blog-name]
-   ```
-
-   **Alternative: Clone directly**
-   ```bash
-   git clone https://github.com/JustSereja/morethan-log-astro.git my-blog
-   cd my-blog
-   ```
-
-2. **Install dependencies**
-   ```bash
+   git clone https://github.com/[your-username]/[your-repo-name].git
+   cd [your-repo-name]
    npm install
    ```
 
-3. **Start development server**
-   ```bash
-   npm run dev
-   ```
+### Running the Development Server
 
-4. **Open your browser**
-   Visit `http://localhost:4321` to see your blog
+Start the development server:
+```bash
+npm run dev
+```
+
+Open your browser and visit `http://localhost:4321` to see your blog!
 
 ## ⚙️ Configuration
 
