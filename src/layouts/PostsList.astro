@@ -188,6 +188,7 @@ function extractCategorySlugFromUrl(url) {
 }
 const categoryUrl = extractCategorySlugFromUrl(Astro.url.pathname);
 const categoryIcon = SITE_CONFIG.categories[categoryUrl] ? SITE_CONFIG.categories[categoryUrl].icon : '📂'
+const categoryDescription = SITE_CONFIG.categories[categoryUrl] ? SITE_CONFIG.categories[categoryUrl].description?.[lang] : null;
 const showPreviews = true; // Enable image previews
 ---
 <Layout
@@ -250,6 +251,9 @@ const showPreviews = true; // Enable image previews
                         <!--    <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"></path>-->
                         <!--</svg>-->
                     </div>
+                    {categoryDescription && (
+                        <p class="categories__description">{categoryDescription}</p>
+                    )}
                     <div class="categories__content"></div>
                 </div>
                 <!--<div class="filter__order">-->

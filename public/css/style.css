@@ -894,6 +894,16 @@ a {
     gap: .25rem;
 }
 
+.categories__description {
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.25rem;
+    color: var(--text-color-highlight);
+    margin-top: 0.5rem;
+    margin-bottom: 1.25rem;
+    opacity: 0.9;
+}
+
 .categories__content {
     position: absolute;
     z-index: 40;

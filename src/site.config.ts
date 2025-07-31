@@ -76,17 +76,29 @@ export default {
     blog: {
       enabled: true,
       path: "/blog",
-      icon: "💻"
+      icon: "💻",
+      description: {
+        en: "Personal thoughts, experiences, and insights from my journey",
+        ru: "Личные мысли, опыт и идеи из моего путешествия"
+      }
     },
     technology: {
       enabled: true,
       path: "/technology",
-      icon: "🚀"
+      icon: "🚀",
+      description: {
+        en: "Deep dives into web development, tools, and best practices",
+        ru: "Глубокое погружение в веб-разработку, инструменты и лучшие практики"
+      }
     },
     projects: {
       enabled: true,
       path: "/projects", 
-      icon: "🛠️"
+      icon: "🛠️",
+      description: {
+        en: "Showcase of my work and open-source contributions",
+        ru: "Витрина моих работ и вклада в открытый исходный код"
+      }
     }
   },
   
