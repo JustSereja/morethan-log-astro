@@ -7,7 +7,7 @@ A modern, customizable blog template built with Astro. Fast, responsive, and mul
 ![Morethan-Log Screenshot](screenshot.png)
 
 > **Inspiration:**
-> This template is inspired by the popular [morethan-log](https://github.com/morethanmin/morethan-log) Next.js template, but rebuilt from the ground up for Astro.
+> I loved the original **[morethan-log](https://github.com/morethanmin/morethan-log)** Next.js template so much that I ported it to Astro for my own site, **[sereja.com](https://sereja.com/)** \- and open-sourced the result as **[morethan-log-astro](https://github.com/JustSereja/morethan-log-astro)** so fellow Astro fans can spin up a blazing-fast blog with the same clean design in seconds.
 
 ## 🚀 Features
 
