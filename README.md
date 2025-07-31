@@ -6,6 +6,9 @@ A modern, customizable blog template built with Astro. Fast, responsive, and mul
 
 ![Morethan-Log Screenshot](screenshot.png)
 
+> **Inspiration:**
+> This template is inspired by the popular [morethan-log](https://github.com/morethanmin/morethan-log) Next.js template, but rebuilt from the ground up for Astro.
+
 ## 🚀 Features
 
 - **🌍 Multilingual Support** - Built-in support for multiple languages (EN/RU by default)
@@ -334,3 +337,18 @@ The template now supports different social links and author names for each langu
 ### Build for Production
 
 ```
+```
+
+## 📸 Release: v1.0.0
+
+![v1.0.0 Screenshot](screenshot.png)
+
+**Initial public release!**
+
+- 🚀 First stable version of Morethan-Log for Astro
+- All core features implemented: multilingual, dark mode, search, categories, SEO, and more
+- Fully customizable and production-ready
+- Inspired by [morethan-log](https://github.com/morethanmin/morethan-log) (Next.js)
+- [Live Demo](https://morethan-log-astro.sereja.com/)
+
+---
