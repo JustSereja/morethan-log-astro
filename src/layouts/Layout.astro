@@ -231,6 +231,10 @@ const hreflangRuUrl = hreflang_ru ? `${baseDomain}${ensureTrailingSlash(hreflang
         <div class="header__text-logo"><a href={ensureTrailingSlash(`/${lang === 'en' ? '' : lang}`)} class="header__text-logo">{SITE_CONFIG.title[lang] || SITE_CONFIG.title.en}</a></div>
 
         <div class="header__nav">
+            <button type="button" class="header__search-toggle" aria-label="Toggle search">
+                <span class="header__search-icon">🔎</span>
+            </button>
+            
             {SITE_CONFIG.features.darkMode && (
                 <button type="button" class="header__theme-mode-switcher theme-mode-switcher" data-mode="light">
                     <span class="theme-mode-switcher__icon icon-dark">🌙</span>
@@ -257,6 +261,7 @@ const hreflangRuUrl = hreflang_ru ? `${baseDomain}${ensureTrailingSlash(hreflang
 <script>
 import '../scripts/theme.js';
 </script>
+<script src="/js/scripts.js" is:inline></script>
 </body>
 
 </html>

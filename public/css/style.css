@@ -686,6 +686,26 @@ a {
     background: none;
 }
 
+.header__search-toggle {
+    font-family: 'Noto Color Emoji', sans-serif;
+    font-size: 1rem;
+    font-style: normal;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0.25rem;
+    margin-right: 0.5rem;
+}
+
+.header__search-icon {
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+.header__search-toggle:hover .header__search-icon {
+    transform: scale(1.1);
+}
+
 .theme-mode-switcher[data-mode=dark] .theme-mode-switcher__icon.icon-dark {
     display: none;
 }
@@ -835,6 +855,14 @@ a {
 
 .search {
     margin-bottom: 1rem;
+    transition: all 0.3s ease-in-out;
+}
+
+.search.hidden {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    margin-bottom: 0;
 }
 
 .search__top {

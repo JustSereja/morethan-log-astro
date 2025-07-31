@@ -225,13 +225,13 @@ const showPreviews = true; // Enable image previews
                     </div>
                 </div>
             </div>
-            <form class="search form" onsubmit="event.preventDefault();">
+            <form class="search form hidden" onsubmit="event.preventDefault();">
                 <div class="search__top">
                     <span class="search__top-icon">🔎</span> {t('ui.search')}
                 </div>
                 <input type="text" class="input" placeholder={t('ui.search_placeholder')}>
             </form>
-            <div id="search-results"></div>
+            <div id="search-results" style="display: none;"></div>
 
 
             <div class="tags tags--mob">

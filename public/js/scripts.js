@@ -177,6 +177,27 @@ document.addEventListener('DOMContentLoaded', function() {
   const searchResultsContainer = document.getElementById('search-results');
   const filterContainer = document.querySelector('.filter');
   let timeoutId = null;
+  
+  // Search toggle functionality
+  const searchToggle = document.querySelector('.header__search-toggle');
+  const searchContainer = document.getElementById('search-container');
+  
+  if (searchToggle && searchContainer) {
+    searchToggle.addEventListener('click', function() {
+      if (searchContainer.style.display === 'none' || searchContainer.style.display === '') {
+        searchContainer.style.display = 'block';
+        setTimeout(() => {
+          searchContainer.classList.add('visible');
+          searchInput.focus();
+        }, 10);
+      } else {
+        searchContainer.classList.remove('visible');
+        setTimeout(() => {
+          searchContainer.style.display = 'none';
+        }, 300);
+      }
+    });
+  }
 
   async function fetchPosts() {
     const response = await fetch('/search.json');

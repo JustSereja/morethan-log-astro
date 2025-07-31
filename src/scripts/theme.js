@@ -88,6 +88,30 @@ const switcherBox = '.theme-mode-switcher';
 document.addEventListener('DOMContentLoaded', function () {
   checkThemeMode(switcherBox);
   onChangeThemeMode(switcherBox);
+  
+  // Search toggle functionality
+  const searchToggle = document.querySelector('.header__search-toggle');
+  const searchForm = document.querySelector('.search.form');
+  const searchResults = document.getElementById('search-results');
+  
+  if (searchToggle && searchForm) {
+    // Ensure search is hidden on page load
+    searchForm.classList.add('hidden');
+    if (searchResults) {
+      searchResults.style.display = 'none';
+    }
+    
+    searchToggle.addEventListener('click', function() {
+      searchForm.classList.toggle('hidden');
+      if (searchResults) {
+        searchResults.style.display = searchForm.classList.contains('hidden') ? 'none' : 'block';
+      }
+      if (!searchForm.classList.contains('hidden')) {
+        const searchInput = searchForm.querySelector('.input');
+        if (searchInput) searchInput.focus();
+      }
+    });
+  }
 });
 
 document.addEventListener('DOMContentLoaded', function () {
