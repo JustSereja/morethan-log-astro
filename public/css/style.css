@@ -27,19 +27,19 @@
     --href-color: inherit; /* Gray for links */
     
     /* Code block theme - Light mode */
-    --code-block-bg: #f6f8fa;
+    --code-block-bg: #f8f8f8;
     --code-block-border: #e1e4e8;
     --code-block-text: #24292e;
-    --inline-code-color: #d73a49;
-    --inline-code-bg: rgba(27, 31, 36, 0.05);
-    --code-lang-bg: rgba(27, 31, 36, 0.05);
-    --code-lang-color: #586069;
-    --line-number-color: #959da5;
-    --copy-btn-color: #586069;
-    --copy-btn-bg: rgba(255, 255, 255, 0.8);
-    --copy-btn-border: rgba(27, 31, 36, 0.15);
-    --copy-btn-hover-bg: rgba(255, 255, 255, 0.95);
-    --copy-btn-hover-border: rgba(27, 31, 36, 0.25);
+    --inline-code-color: #c7254e;
+    --inline-code-bg: #f9f2f4;
+    --code-lang-bg: rgba(0, 0, 0, 0.05);
+    --code-lang-color: #666666;
+    --line-number-color: #999999;
+    --copy-btn-color: #666666;
+    --copy-btn-bg: rgba(255, 255, 255, 0.9);
+    --copy-btn-border: rgba(0, 0, 0, 0.1);
+    --copy-btn-hover-bg: rgba(255, 255, 255, 1);
+    --copy-btn-hover-border: rgba(0, 0, 0, 0.2);
     --copy-btn-success: #28a745;
 }
 
@@ -471,9 +471,9 @@ a {
     user-select: none;
     transition: all 0.2s ease;
     opacity: 0;
-    color: var(--copy-btn-color, #a0a0a0);
-    background: var(--copy-btn-bg, rgba(255, 255, 255, 0.1));
-    border: 1px solid var(--copy-btn-border, rgba(255, 255, 255, 0.2));
+    color: var(--copy-btn-color);
+    background: var(--copy-btn-bg);
+    border: 1px solid var(--copy-btn-border);
     border-radius: 6px;
     backdrop-filter: blur(10px);
 }
@@ -663,7 +663,7 @@ a {
     margin: 1.5em 0;
     padding: 0;
     background: var(--code-block-bg, #1e1e1e);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
     border: 1px solid var(--code-block-border, rgba(255, 255, 255, 0.1));
 }
 
@@ -2417,10 +2417,19 @@ caption {
 /*    display: none;*/
 /*}*/
 
-/* Highlight.js theme - VS Code Dark+ inspired */
+/* Highlight.js theme - Theme-aware */
 .hljs {
     color: var(--code-block-text);
     background: transparent;
+}
+
+/* Ensure code blocks use appropriate theme colors */
+.text-block pre {
+    background: var(--code-block-bg) !important;
+}
+
+.text-block pre code {
+    color: var(--code-block-text) !important;
 }
 
 /* Dark mode syntax highlighting (default) */
@@ -2501,10 +2510,11 @@ html.dark-mode .hljs-params {
     color: #9cdcfe;
 }
 
-/* Light mode overrides */
+/* Light mode overrides - Vibrant theme */
 html:not(.dark-mode) .hljs-comment,
 html:not(.dark-mode) .hljs-quote {
     color: #008000;
+    font-style: italic;
 }
 
 html:not(.dark-mode) .hljs-keyword,
@@ -2513,6 +2523,7 @@ html:not(.dark-mode) .hljs-built_in,
 html:not(.dark-mode) .hljs-name,
 html:not(.dark-mode) .hljs-tag {
     color: #0000ff;
+    font-weight: 600;
 }
 
 html:not(.dark-mode) .hljs-string,
@@ -2535,15 +2546,17 @@ html:not(.dark-mode) .hljs-meta {
 }
 
 html:not(.dark-mode) .hljs-attr {
-    color: #0451a5;
+    color: #ff0000;
 }
 
 html:not(.dark-mode) .hljs-function {
     color: #795e26;
+    font-weight: 600;
 }
 
 html:not(.dark-mode) .hljs-class {
     color: #267f99;
+    font-weight: 600;
 }
 
 html:not(.dark-mode) .hljs-number {
