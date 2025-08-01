@@ -337,18 +337,3 @@ The template now supports different social links and author names for each langu
 ### Build for Production
 
 ```
-```
-
-## 📸 Release: v1.0.0
-
-![v1.0.0 Screenshot](screenshot.png)
-
-**Initial public release!**
-
-- 🚀 First stable version of Morethan-Log for Astro
-- All core features implemented: multilingual, dark mode, search, categories, SEO, and more
-- Fully customizable and production-ready
-- Inspired by [morethan-log](https://github.com/morethanmin/morethan-log) (Next.js)
-- [Live Demo](https://morethan-log-astro.sereja.com/)
-
----
