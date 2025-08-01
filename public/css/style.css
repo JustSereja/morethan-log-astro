@@ -907,6 +907,85 @@ a {
     margin-left: 1rem;
 }
 
+/* Mobile menu toggle */
+.header__menu-toggle {
+    display: none;
+    font-family: 'Noto Color Emoji', sans-serif;
+    font-size: 1.1rem;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0.25rem;
+    margin-left: 0.5rem;
+    color: var(--main-color);
+}
+
+.header__menu-icon {
+    display: block;
+    line-height: 1;
+}
+
+/* Mobile menu */
+.mobile-menu {
+    position: fixed;
+    top: 3rem;
+    left: 0;
+    right: 0;
+    background: var(--main-bg);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.mobile-menu.active {
+    max-height: 200px;
+    transition: max-height 0.3s ease-in;
+}
+
+.mobile-menu__nav {
+    padding: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.mobile-menu__link {
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    color: var(--main-color);
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+    font-size: 1rem;
+    display: block;
+}
+
+.mobile-menu__link:hover {
+    background-color: var(--secondary-bg);
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    .header__link--desktop {
+        display: none;
+    }
+    
+    .header__menu-toggle {
+        display: block;
+    }
+    
+    /* Adjust spacing on mobile */
+    .header__search-toggle {
+        margin-right: 0.25rem;
+    }
+    
+    .header__theme-mode-switcher {
+        margin-left: 0;
+    }
+}
+
 .content {
     display: grid;
 

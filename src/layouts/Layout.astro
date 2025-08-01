@@ -244,14 +244,27 @@ const hreflangRuUrl = hreflang_ru ? `${baseDomain}${ensureTrailingSlash(hreflang
                 </button>
             )}
 
-            <div class="header__link"><a href={translatePath('/about')}>{t('ui.about')}</a></div>
-            <div class="header__link">
+            <div class="header__link header__link--desktop"><a href={translatePath('/about')}>{t('ui.about')}</a></div>
+            <div class="header__link header__link--desktop">
                 <a href={getLocaleSwitchPath(lang, currentPath)}>{t('ui.other_locale')}</a>
             </div>
-
+            
+            <button type="button" class="header__menu-toggle" aria-label="Toggle menu">
+                <span class="header__menu-icon">☰</span>
+            </button>
         </div>
     </div>
 </header>
+
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mobile-menu">
+    <div class="cont">
+        <nav class="mobile-menu__nav">
+            <a href={translatePath('/about')} class="mobile-menu__link">{t('ui.about')}</a>
+            <a href={getLocaleSwitchPath(lang, currentPath)} class="mobile-menu__link">{t('ui.other_locale')}</a>
+        </nav>
+    </div>
+</div>
 
 <main>
     <div class="cont">
@@ -264,6 +277,7 @@ const hreflangRuUrl = hreflang_ru ? `${baseDomain}${ensureTrailingSlash(hreflang
 import '../scripts/theme.js';
 import '../scripts/code-enhance.js';
 import '../scripts/theme-fix.js';
+import '../scripts/mobile-menu.js';
 </script>
 </body>
 
