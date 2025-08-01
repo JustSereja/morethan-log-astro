@@ -85,9 +85,10 @@ const onChangeThemeMode = (switcherBox) => {
 const switcherBox = '.theme-mode-switcher';
 
 
+// Don't initialize theme switching here since _scripts.js handles it
 document.addEventListener('DOMContentLoaded', function () {
-  checkThemeMode(switcherBox);
-  onChangeThemeMode(switcherBox);
+  // checkThemeMode(switcherBox);
+  // onChangeThemeMode(switcherBox);
   
   // Search toggle functionality
   const searchToggle = document.querySelector('.header__search-toggle');

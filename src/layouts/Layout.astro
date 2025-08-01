@@ -107,6 +107,31 @@ function isCategoryPage() {
     return categoryPathRegex.test(Astro.url.pathname);
 }
 
+// Function to determine if we're on a page with post lists (where search should be shown)
+function isPostListPage() {
+    const pathname = Astro.url.pathname;
+    
+    // Check if it's the home page
+    if (pathname === '/' || pathname === '/ru/' || pathname === '/en/') {
+        return true;
+    }
+    
+    // Check if it's a category page (including paginated versions)
+    const postListRegex = new RegExp(`^/(ru/)?(${categoriesArray.join('|')})/?(\\d+/?)?$`);
+    if (postListRegex.test(pathname)) {
+        return true;
+    }
+    
+    // Check if it's a paginated home page
+    if (/^\/(\d+\/?)?$/.test(pathname) || /^\/ru\/(\d+\/?)?$/.test(pathname)) {
+        return true;
+    }
+    
+    return false;
+}
+
+const showSearch = isPostListPage();
+
 // Format hreflang URLs with trailing slashes
 const hreflangEnUrl = hreflang_en ? `${baseDomain}${ensureTrailingSlash(hreflang_en)}` : null;
 const hreflangRuUrl = hreflang_ru ? `${baseDomain}${ensureTrailingSlash(hreflang_ru)}` : null;
@@ -203,8 +228,8 @@ const hreflangRuUrl = hreflang_ru ? `${baseDomain}${ensureTrailingSlash(hreflang
             <link rel="alternate" type="application/rss+xml" href={`/${lang}/rss.xml`} title={`${SITE_CONFIG.title[lang] || SITE_CONFIG.title.en} - ${lang === 'en' ? 'English' : 'Russian'} RSS Feed`} />
             {/* Alternative language RSS feed */}
             {lang === 'en' 
-                ? <link rel="alternate" type="application/rss+xml" href="/ru/rss.xml" hreflang="ru" title={`${SITE_CONFIG.title.ru || SITE_CONFIG.title.en} - Russian RSS Feed`} />
-                : <link rel="alternate" type="application/rss+xml" href="/en/rss.xml" hreflang="en" title={`${SITE_CONFIG.title.en} - English RSS Feed`} />
+                ? <link rel="alternate" type="application/rss+xml" href="/ru/rss.xml" title={`${SITE_CONFIG.title.ru || SITE_CONFIG.title.en} - Russian RSS Feed`} />
+                : <link rel="alternate" type="application/rss+xml" href="/en/rss.xml" title={`${SITE_CONFIG.title.en} - English RSS Feed`} />
             }
         </>
     )}
@@ -223,6 +248,52 @@ const hreflangRuUrl = hreflang_ru ? `${baseDomain}${ensureTrailingSlash(hreflang
         </>
     )}
 
+    <!-- Scripts -->
+    <script defer src="/js/_scripts.js?_v=20240421212219"></script>
+    <script is:inline>
+        // Fix for pages without posts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Override getPosts to handle missing elements safely
+            if (typeof getPosts !== 'undefined') {
+                const originalGetPosts = getPosts;
+                window.getPosts = function(path) {
+                    try {
+                        const posts = [];
+                        const postList = document.querySelectorAll(path);
+                        
+                        postList.forEach((element) => {
+                            const categoryEl = element.querySelector('.category__item');
+                            const titleEl = element.querySelector('.post__title');
+                            const dateEl = element.querySelector('.post__date');
+                            const summaryEl = element.querySelector('.post__summary');
+                            
+                            if (categoryEl && titleEl && dateEl && summaryEl) {
+                                const tags = [];
+                                const tagElements = element.querySelectorAll('.post__tag');
+                                tagElements.forEach(tag => {
+                                    tags.push(tag.innerHTML);
+                                });
+                                
+                                posts.push({
+                                    path: element,
+                                    category: categoryEl.innerHTML,
+                                    title: titleEl.innerHTML,
+                                    date: dateEl.innerHTML,
+                                    description: summaryEl.innerHTML,
+                                    tags: tags
+                                });
+                            }
+                        });
+                        
+                        return posts;
+                    } catch (e) {
+                        console.warn('Error in getPosts:', e);
+                        return [];
+                    }
+                };
+            }
+        });
+    </script>
 </head>
 
 <body>
@@ -231,9 +302,11 @@ const hreflangRuUrl = hreflang_ru ? `${baseDomain}${ensureTrailingSlash(hreflang
         <div class="header__text-logo"><a href={ensureTrailingSlash(`/${lang === 'en' ? '' : lang}`)} class="header__text-logo">{SITE_CONFIG.title[lang] || SITE_CONFIG.title.en}</a></div>
 
         <div class="header__nav">
-            <button type="button" class="header__search-toggle" aria-label="Toggle search">
-                <span class="header__search-icon">🔎</span>
-            </button>
+            {showSearch && (
+                <button type="button" class="header__search-toggle" aria-label="Toggle search">
+                    <span class="header__search-icon">🔎</span>
+                </button>
+            )}
             
             {SITE_CONFIG.features.darkMode && (
                 <button type="button" class="header__theme-mode-switcher theme-mode-switcher" data-mode="light">
@@ -242,14 +315,27 @@ const hreflangRuUrl = hreflang_ru ? `${baseDomain}${ensureTrailingSlash(hreflang
                 </button>
             )}
 
-            <div class="header__link"><a href={translatePath('/about')}>{t('ui.about')}</a></div>
-            <div class="header__link">
+            <div class="header__link header__link--desktop"><a href={translatePath('/about')}>{t('ui.about')}</a></div>
+            <div class="header__link header__link--desktop">
                 <a href={getLocaleSwitchPath(lang, currentPath)}>{t('ui.other_locale')}</a>
             </div>
-
+            
+            <button type="button" class="header__menu-toggle" aria-label="Toggle menu">
+                <span class="header__menu-icon">☰</span>
+            </button>
         </div>
     </div>
 </header>
+
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mobile-menu">
+    <div class="cont">
+        <nav class="mobile-menu__nav">
+            <a href={translatePath('/about')} class="mobile-menu__link">{t('ui.about')}</a>
+            <a href={getLocaleSwitchPath(lang, currentPath)} class="mobile-menu__link">{t('ui.other_locale')}</a>
+        </nav>
+    </div>
+</div>
 
 <main>
     <div class="cont">
@@ -260,6 +346,9 @@ const hreflangRuUrl = hreflang_ru ? `${baseDomain}${ensureTrailingSlash(hreflang
 
 <script>
 import '../scripts/theme.js';
+import '../scripts/code-enhance.js';
+import '../scripts/theme-fix.js';
+import '../scripts/mobile-menu.js';
 </script>
 </body>
 
