@@ -5,8 +5,10 @@ import { marked } from 'marked';
 import * as path from "node:path";
 import { ensureTrailingSlash } from '../utils/url';
 import AIWarning from '../components/AIWarning.astro';
+import FloatingTOC from '../components/FloatingTOC.astro';
 
 const {title, h1, date, custom_category, hreflang_ru, hreflang_en, image, AI} = Astro.props.frontmatter;
+const { headings } = Astro.props;
 // i18n
 import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
 import SITE_CONFIG from '../site.config';
@@ -111,6 +113,11 @@ const firstImage = extractFirstImage(markdownContent);
             </article>
         </div>
     </div>
+    
+    {headings && headings.length > 0 && (
+        <FloatingTOC headings={headings} />
+    )}
+    
     <div id="lightbox" class="lightbox" onclick="closeLightbox()">
         <span class="close">&times;</span>
         <img class="lightbox-content">

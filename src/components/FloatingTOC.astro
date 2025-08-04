@@ -1,0 +1,247 @@
+---
+export interface Props {
+  headings: Array<{
+    depth: number;
+    text: string;
+    slug: string;
+  }>;
+}
+
+const { headings } = Astro.props;
+
+// Only include h2 headings
+const tocHeadings = headings.filter(h => h.depth === 2);
+---
+
+{tocHeadings.length > 0 && (
+  <aside class="floating-toc" aria-label="Table of contents">
+    <div class="floating-toc__inner">
+      <div class="floating-toc__header">Contents</div>
+      <nav class="floating-toc__nav">
+        {tocHeadings.map((heading) => (
+          <a 
+            href={`#${heading.slug}`} 
+            class={`floating-toc__link floating-toc__link--level-${heading.depth}`}
+            data-level={heading.depth}
+          >
+            <span class="floating-toc__text">{heading.text}</span>
+          </a>
+        ))}
+      </nav>
+    </div>
+  </aside>
+)}
+
+<style>
+  /* Hide on mobile and tablets */
+  @media (max-width: 1400px) {
+    .floating-toc {
+      display: none;
+    }
+  }
+
+  .floating-toc {
+    position: fixed;
+    top: 50%;
+    right: 2rem;
+    transform: translateY(-50%);
+    width: 220px;
+    max-height: 70vh;
+    z-index: 10;
+  }
+
+  .floating-toc__inner {
+    padding: 1.5rem 0;
+    overflow-y: auto;
+    max-height: 70vh;
+    
+    /* Subtle scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+  }
+
+  .floating-toc__inner::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .floating-toc__inner::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .floating-toc__inner::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 2px;
+  }
+
+  .floating-toc__header {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-color);
+    opacity: 0.5;
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+  }
+
+  .floating-toc__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .floating-toc__link {
+    display: block;
+    padding: 0.375rem 1rem;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    opacity: 0.6;
+    transition: all 0.2s ease;
+    border-left: 2px solid transparent;
+    position: relative;
+  }
+
+
+
+  .floating-toc__link:hover {
+    opacity: 1;
+    color: var(--main-color);
+  }
+
+  .floating-toc__link.active {
+    opacity: 1;
+    color: var(--main-color);
+    border-left-color: var(--main-color);
+    background: linear-gradient(to right, rgba(0,0,0,0.02), transparent);
+  }
+
+  /* Dark mode gradient adjustment */
+  @media (prefers-color-scheme: dark) {
+    .floating-toc__link.active {
+      background: linear-gradient(to right, rgba(255,255,255,0.02), transparent);
+    }
+  }
+
+  /* Text truncation for long headings */
+  .floating-toc__text {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Smooth fade in animation */
+  .floating-toc {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-50%) translateX(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+  }
+
+  /* For very large screens, position relative to content */
+  @media (min-width: 1600px) {
+    .floating-toc {
+      right: calc((100vw - 1200px) / 2 - 280px);
+      max-width: 250px;
+    }
+  }
+  
+  @media (min-width: 1920px) {
+    .floating-toc {
+      right: calc((100vw - 1200px) / 2 - 320px);
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const toc = document.querySelector('.floating-toc');
+    if (!toc) return;
+
+    const links = toc.querySelectorAll('.floating-toc__link');
+    const headings = Array.from(links).map(link => {
+      const id = link.getAttribute('href').slice(1);
+      return document.getElementById(id);
+    }).filter(Boolean);
+
+    // Smooth scrolling with offset
+    links.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href').slice(1);
+        const targetElement = document.getElementById(targetId);
+        
+        if (targetElement) {
+          const offset = 100;
+          const targetPosition = targetElement.offsetTop - offset;
+          
+          window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+          });
+
+          history.pushState(null, null, `#${targetId}`);
+        }
+      });
+    });
+
+    // Intersection Observer for active state
+    const observerOptions = {
+      rootMargin: '-100px 0px -70% 0px',
+      threshold: 0
+    };
+
+    const activeClass = 'active';
+    let currentActiveLink = null;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const id = entry.target.getAttribute('id');
+        const correspondingLink = toc.querySelector(`[href="#${id}"]`);
+        
+        if (entry.isIntersecting) {
+          // Remove active class from previous link
+          if (currentActiveLink && currentActiveLink !== correspondingLink) {
+            currentActiveLink.classList.remove(activeClass);
+          }
+          
+          // Add active class to current link
+          if (correspondingLink) {
+            correspondingLink.classList.add(activeClass);
+            currentActiveLink = correspondingLink;
+          }
+        }
+      });
+    }, observerOptions);
+
+    // Observe all headings
+    headings.forEach(heading => {
+      if (heading) observer.observe(heading);
+    });
+
+    // Set initial active state based on scroll position
+    const setInitialActive = () => {
+      const scrollPosition = window.scrollY + 150;
+      
+      for (let i = headings.length - 1; i >= 0; i--) {
+        if (headings[i] && scrollPosition >= headings[i].offsetTop) {
+          links[i].classList.add(activeClass);
+          currentActiveLink = links[i];
+          break;
+        }
+      }
+    };
+
+    setInitialActive();
+  });
+</script>
