@@ -33,6 +33,14 @@ export const ui = {
         'ui.ai_warning': 'The content of this material is written or translated using AI',
         'ui.contents': 'Contents',
         'ui.all_posts': 'All Posts',
+        // Page titles
+        'ui.blog_posts': 'Blog Posts',
+        'ui.technology_posts': 'Technology Posts',
+        'ui.projects_title': 'Projects',
+        // Page descriptions
+        'ui.blog_description': 'Personal thoughts, experiences, and insights',
+        'ui.technology_description': 'Latest posts about technology, programming, and development',
+        'ui.projects_description': 'Featured projects and experiments',
     },
     ru: {
         'name': SITE_CONFIG.author.name.ru,
@@ -59,6 +67,14 @@ export const ui = {
         'ui.ai_warning': 'Содержание этого материала написано или переведено с помощью ИИ',
         'ui.contents': 'Содержание',
         'ui.all_posts': 'Все записи',
+        // Page titles
+        'ui.blog_posts': 'Блог',
+        'ui.technology_posts': 'Посты о технологиях',
+        'ui.projects_title': 'Проекты',
+        // Page descriptions
+        'ui.blog_description': 'Личные мысли, опыт и идеи',
+        'ui.technology_description': 'Последние посты о технологиях, программировании и разработке',
+        'ui.projects_description': 'Избранные проекты и эксперименты',
     },
 } as const;
 
