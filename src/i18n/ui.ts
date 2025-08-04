@@ -31,6 +31,7 @@ export const ui = {
         'ui.page_not_found': 'Page not found',
         'ui.404_message': 'The page you are looking for does not exist.',
         'ui.ai_warning': 'The content of this material is written or translated using AI',
+        'ui.contents': 'Contents',
     },
     ru: {
         'name': SITE_CONFIG.author.name.ru,
@@ -55,6 +56,7 @@ export const ui = {
         'ui.page_not_found': 'Страница не найдена',
         'ui.404_message': 'Страница, которую вы ищете, не существует.',
         'ui.ai_warning': 'Содержание этого материала написано или переведено с помощью ИИ',
+        'ui.contents': 'Содержание',
     },
 } as const;
 

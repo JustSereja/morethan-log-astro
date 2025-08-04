@@ -115,7 +115,7 @@ const firstImage = extractFirstImage(markdownContent);
     </div>
     
     {headings && headings.length > 0 && (
-        <FloatingTOC headings={headings} />
+        <FloatingTOC headings={headings} lang={lang} />
     )}
     
     <div id="lightbox" class="lightbox" onclick="closeLightbox()">

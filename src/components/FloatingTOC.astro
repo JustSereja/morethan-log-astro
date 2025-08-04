@@ -1,13 +1,17 @@
 ---
+import { useTranslations } from '../i18n/utils';
+
 export interface Props {
   headings: Array<{
     depth: number;
     text: string;
     slug: string;
   }>;
+  lang: 'en' | 'ru';
 }
 
-const { headings } = Astro.props;
+const { headings, lang } = Astro.props;
+const t = useTranslations(lang);
 
 // Only include h2 headings
 const tocHeadings = headings.filter(h => h.depth === 2);
@@ -16,7 +20,7 @@ const tocHeadings = headings.filter(h => h.depth === 2);
 {tocHeadings.length > 0 && (
   <aside class="floating-toc" aria-label="Table of contents">
     <div class="floating-toc__inner">
-      <div class="floating-toc__header">Contents</div>
+      <div class="floating-toc__header">{t('ui.contents')}</div>
       <nav class="floating-toc__nav">
         {tocHeadings.map((heading) => (
           <a 
