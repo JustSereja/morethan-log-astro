@@ -357,3 +357,65 @@ The template now supports different social links and author names for each langu
 ```bash
 npm run build
 ```
+
+## 🔄 Updating the Template
+
+Keeping your project in sync with the upstream template is easiest when you track the original repository and selectively pull in changes.
+
+### Track template releases from your project
+
+Run the following once inside your project folder:
+
+```bash
+git remote add upstream https://github.com/JustSereja/morethan-log-astro.git
+git fetch upstream --tags
+```
+
+From now on, `git fetch upstream --tags` pulls the latest commits and release tags. You can inspect what changed with `git log upstream/main`.
+
+### Merge everything (demo content included)
+
+If you want the full template (including demo posts and placeholder config) in your project:
+
+```bash
+git checkout main
+git pull
+git merge upstream/main
+```
+
+Resolve any conflicts, test the build, then commit the merge.
+
+### Update code without demo content or placeholder config
+
+To grab only the template code while keeping your own content and configuration, restore just the framework directories from the template branch (or a specific release tag):
+
+```bash
+# Update TAG if you prefer a specific release, e.g. upstream/v2.0.0
+TARGET_REF=upstream/main
+
+git fetch upstream --tags
+git checkout main
+git pull
+
+git restore --source "$TARGET_REF" \
+  astro.config.mjs \
+  package.json package-lock.json \
+  tsconfig.json \
+  public/css public/favicon.ico public/favicon.svg public/img \
+  scripts \
+  src/components src/i18n src/layouts src/lib src/pages src/scripts src/utils
+
+# keep your live content and custom site settings
+git checkout -- src/content src/config/site.ts
+
+npm install
+npx astro sync
+npm run build
+```
+
+This sequence:
+- Brings in the latest template logic, layouts, scripts, and assets.
+- Leaves `src/content/**` untouched, so your posts and pages stay intact.
+- Restores your own `src/config/site.ts`, keeping personal branding, social links, and other secrets.
+
+Review `git status`, commit the updated files, and (optionally) create a tag for the new version of your site.
