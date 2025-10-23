@@ -26,9 +26,13 @@
   },
   "homepage": "https://morethan-log-astro.sereja.com",
   "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro build",
+    "dev": "run-p client:watch astro:dev",
+    "start": "npm run dev",
+    "build": "run-s client:build astro:build",
+    "client:build": "node scripts/build-client.mjs",
+    "client:watch": "node scripts/build-client.mjs --watch",
+    "astro:dev": "astro dev",
+    "astro:build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -39,6 +43,8 @@
   },
   "devDependencies": {
     "astro-compress": "^2.3.8",
-    "astro-purgecss": "^5.3.0"
+    "astro-purgecss": "^5.3.0",
+    "esbuild": "^0.24.0",
+    "npm-run-all": "^4.1.5"
   }
 }
