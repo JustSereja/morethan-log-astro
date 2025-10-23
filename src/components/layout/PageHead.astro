@@ -1,5 +1,6 @@
 ---
 import siteConfig from '@config/site';
+import clientScriptUrl from '../../scripts/main.ts?url';
 import { DEFAULT_LOCALE, listNonDefaultLocales } from '@lib/language';
 
 type AlternateLink = {
@@ -60,7 +61,7 @@ const rssTitleDefault = siteConfig.title[DEFAULT_LOCALE] ?? siteConfig.title.en;
   <link rel="stylesheet" href="https://unpkg.com/@highlightjs/cdn-assets@11.4.0/styles/base16/tomorrow-night.min.css" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-  <script type="module" src="/js/main.js"></script>
+  <script type="module" src={clientScriptUrl}></script>
 
   <title>{title}</title>
 

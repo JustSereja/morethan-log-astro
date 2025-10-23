@@ -69,6 +69,8 @@ npm run dev
 
 Open your browser and visit `http://localhost:4321` to see your blog!
 
+> `npm run dev` now handles all client-side bundles automatically—no extra watch commands needed. Edit files under `src/` and the Astro dev server takes care of the rest.
+
 ## ⚙️ Configuration
 
 All site configuration is centralized in `src/config/site.ts` and fully typed:
@@ -361,6 +363,27 @@ npm run build
 ## 🔄 Updating the Template
 
 Keeping your project in sync with the upstream template is easiest when you track the original repository and selectively pull in changes.
+
+### Recommended: use the bundled Make target
+
+From your project root, run:
+
+```bash
+make update-template
+```
+
+This command:
+- Clones the latest `main` branch of the upstream template into `.template-update`
+- Syncs framework, layout, scripts, styles, and assets into your project using `rsync`
+- Leaves your content (`src/content/**`), personal config (`src/config/site.ts`), and images (`public/img/**`, favicons) untouched
+- Cleans up the temporary clone when finished
+- Anything under `public/css/` is considered template-owned; keep personal overrides elsewhere or reapply them after the sync
+
+Requirements:
+- `git` and `rsync` installed (macOS/Linux ship with both; on Windows, use WSL or install via package manager)
+- Any local changes committed or stashed so you can review the diff the command produces
+
+After it runs, review `git status`, resolve conflicts (if any), reinstall deps when `package.json` changes, and run `npx astro sync` followed by `npm run build` to double-check everything still compiles.
 
 ### Track template releases from your project
 
