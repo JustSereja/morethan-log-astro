@@ -5,7 +5,7 @@
 The following improvements have been made to the template:
 
 1. **Site Configuration Centralization**
-   - All customizable options now in `site.config.ts`
+   - All customizable options now in `src/config/site.ts`
    - Removed hardcoded author names from posts
    - Social links, categories, and features configurable in one place
 
@@ -35,7 +35,7 @@ The following improvements have been made to the template:
 
 ### 1. **Update Configuration**
 
-Edit `src/site.config.ts`:
+Edit `src/config/site.ts`:
 
 - [ ] Update `title` with your blog name (currently: "Morethan-Log")
 - [ ] Update `description` (both English and Russian)

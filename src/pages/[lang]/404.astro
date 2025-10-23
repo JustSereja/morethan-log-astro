@@ -1,0 +1,46 @@
+---
+import Layout from '@layouts/Layout.astro';
+import siteConfig from '@config/site';
+import { useTranslations, useTranslatedPath } from '@i18n/utils';
+import {
+  DEFAULT_LOCALE,
+  isDefaultLocale,
+  isSupportedLocale,
+  listNonDefaultLocales,
+  normalizeLocale,
+} from '@lib/language';
+
+export function getStaticPaths() {
+  return listNonDefaultLocales().map((lang) => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+const fallbackLocale = listNonDefaultLocales()[0] ?? DEFAULT_LOCALE;
+const locale =
+  lang && isSupportedLocale(lang) && !isDefaultLocale(lang)
+    ? normalizeLocale(lang)
+    : fallbackLocale;
+
+const translatePath = useTranslatedPath(locale);
+const t = useTranslations(locale);
+---
+<Layout title={t('ui.not_found')} description={t('ui.not_found')}>
+  <div class="sect404">
+    <div class="sect404__wrapper">
+      <div class="sect404__top">
+        <div>4</div>
+        <span class="icon">🤔</span>
+        <div>4</div>
+      </div>
+
+      <div class="sect404__text">{t('ui.not_found')}</div>
+      <div class="article__category category">
+        <div class="category__item category__item--light-blue">
+          <a class="category__item category__item--light-blue" href={translatePath('/')}>
+            💻 {siteConfig.title[locale] ?? siteConfig.title[DEFAULT_LOCALE]}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

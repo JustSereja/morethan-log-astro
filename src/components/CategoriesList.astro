@@ -1,59 +1,46 @@
 ---
-import { promises as fs } from 'fs';
-import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
-import SITE_CONFIG from '../site.config';
+import {
+  getCategoryConfig,
+  getEnabledCategoryIds,
+  getPosts,
+  getPostCategory,
+} from '@lib/content';
+import { DEFAULT_LOCALE } from '@lib/language';
+import { ensureTrailingSlash } from '@utils/url';
+import { getLangFromUrl, useTranslatedPath } from '@i18n/utils';
 
 const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
 const translatePath = useTranslatedPath(lang);
 
-// Load all posts
-const posts = import.meta.glob<{frontmatter: any}>('../pages/**/*.md', { eager: true });
-const allPosts = Object.entries(posts).map(([filepath, post]) => ({
-    ...post,
-    file: filepath,
-    url: filepath.replace('../pages', '').replace('.md', '')
-}));
-
-// Function to determine post language by its path
-const getPostLang = (filePath) => filePath.includes('/ru/') ? 'ru' : 'en';
-
-// Gather information about the number of posts in each category for each language
-const categoryCounts = allPosts.reduce((acc, post) => {
-    const postLang = getPostLang(post.file);
-    if (postLang === lang) {  // Only posts of the current language
-        const match = post.file.match(/\/pages\/(?:ru\/)?([^\/]+)\/.*/);
-        if (match) {
-            const categorySlug = match[1];
-            acc[categorySlug] = (acc[categorySlug] || 0) + 1;
-        }
-    }
-    return acc;
+const posts = await getPosts({ lang });
+const counts = posts.reduce<Record<string, number>>((acc, post) => {
+  const category = getPostCategory(post);
+  acc[category] = (acc[category] ?? 0) + 1;
+  return acc;
 }, {});
 
-// Create an array of links based on slugs and translation from categories
-const possibleLinks = Object.entries(SITE_CONFIG.categories)
-    .filter(([key, category]) => category.enabled)
-    .map(([key, category]) => ({
-        key: key,  // Use key as slug
-        text: t(`ui.${key}` as any)  // Get translated category name
-    }));
+const links = getEnabledCategoryIds()
+  .map((key) => {
+    const config = getCategoryConfig(key);
+    if (!config) {
+      return null;
+    }
 
-// Create links for categories that have posts
-const categoryLinks = possibleLinks
-    .filter(link => categoryCounts[link.key] > 0)  // Filter out categories without posts
-    .map(link => ({
-        href: translatePath(`/${link.key}`),  // Create link to category
-        text: `${link.text} (${categoryCounts[link.key]})`  // Display name and post count
-    }));
+    return {
+      key,
+      href: translatePath(`/${key}`),
+      label: config.label?.[lang] ?? config.label?.[DEFAULT_LOCALE] ?? key,
+      count: counts[key] ?? 0,
+    };
+  })
+  .filter((link): link is NonNullable<typeof link> => Boolean(link && link.count > 0));
 
-const currentPath = Astro.url.pathname;
+const currentPath = ensureTrailingSlash(Astro.url.pathname);
 ---
 <div class="tags__list">
-    {categoryLinks.map(link => (
-            <a href={link.href} data-active={link.href === currentPath ? 'true' : 'false'}>
-                {link.text}
-            </a>
-    ))}
+  {links.map((link) => (
+    <a href={link.href} data-active={link.href === currentPath ? 'true' : 'false'}>
+      {link.label} ({link.count})
+    </a>
+  ))}
 </div>
-

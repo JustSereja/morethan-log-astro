@@ -1,186 +1,189 @@
 ---
-import Layout from "./Layout.astro";
-import { promises as fs } from 'fs';
-import { marked } from 'marked';
-import * as path from "node:path";
-import { ensureTrailingSlash } from '../utils/url';
-import AIWarning from '../components/AIWarning.astro';
-import FloatingTOC from '../components/FloatingTOC.astro';
+import Layout from './Layout.astro';
+import AIWarning from '@components/AIWarning.astro';
+import FloatingTOC from '@components/FloatingTOC.astro';
+import siteConfig from '@config/site';
+import {
+  type PostEntry,
+  getCategoryConfig,
+  getPostImage,
+  getPostPermalink,
+  getPostTranslations,
+  getPostLanguage,
+  getPostCategory,
+} from '@lib/content';
+import { formatDate } from '@lib/format';
+import { DEFAULT_LOCALE } from '@lib/language';
+import { useTranslations, useTranslatedPath } from '@i18n/utils';
 
-const {title, h1, date, custom_category, hreflang_ru, hreflang_en, image, AI} = Astro.props.frontmatter;
-const { headings } = Astro.props;
-// i18n
-import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
-import SITE_CONFIG from '../site.config';
+const {
+  entry,
+  Content,
+  headings = [],
+}: {
+  entry: PostEntry;
+  Content: any;
+  headings: Array<{ depth: number; slug: string; text: string }>;
+} = Astro.props;
 
-const lang = getLangFromUrl(Astro.url);
+const lang = getPostLanguage(entry);
 const t = useTranslations(lang);
 const translatePath = useTranslatedPath(lang);
 
-function extractCategoryFromUrl(url) {
-    const match = url.match(/\/(?:ru\/)?([^\/]+)\/.*/);
-    return match ? match[1] : null;
-}
+const publishedDate = formatDate(entry.data.date, lang);
+const heroImage = getPostImage(entry);
+const categoryKey = getPostCategory(entry);
+const categoryConfig = getCategoryConfig(categoryKey);
+const categoryLabel =
+  categoryConfig &&
+  (categoryConfig.label?.[lang] ??
+    categoryConfig.label?.[DEFAULT_LOCALE] ??
+    categoryKey);
 
-const category = custom_category ?? extractCategoryFromUrl(Astro.props.url);
-
-async function setup() {
-    const baseDirectory = lang === 'ru' ? 'src/pages/ru' : 'src/pages';
-    let postPath = Astro.url.pathname;
-    
-    // Remove language prefix if present
-    if (lang === 'ru') {
-        postPath = postPath.replace('/ru', '');
-    }
-    
-    // Remove trailing slash and add .md extension
-    postPath = postPath.replace(/\/$/, '');
-    const markdownPath = path.join(baseDirectory + postPath + '.md');
-    
-    let markdownContent = '';
-    try {
-        markdownContent = await fs.readFile(markdownPath, 'utf-8');
-    } catch (err) {
-        // Silently handle error
-    }
-
-    return {
-        markdownContent,
-    };
-}
-
-const { markdownContent } = await setup();
-
-const extractFirstImage = (markdown) => {
-    const tokens = marked.lexer(markdown);
-    for (const token of tokens) {
-        if (token.type === 'image') {
-            return token.href;
-        } else if (token.type === 'paragraph' && token.text.includes('![](')) {
-            const matches = token.text.match(/!\[.*?\]\((.*?)\)/);
-            if (matches && matches[1]) {
-                return matches[1];
-            }
-        }
-    }
-    return false;
-};
-
-const firstImage = extractFirstImage(markdownContent);
+const translations = await getPostTranslations(entry);
+const alternates = translations
+  .filter((item) => item.id !== entry.id)
+  .map((item) => ({
+    lang: getPostLanguage(item),
+    url: new URL(getPostPermalink(item), siteConfig.siteUrl).toString(),
+  }));
 ---
-<Layout title={title || h1}
-        hreflang_en={hreflang_en} hreflang_ru={hreflang_ru}
-        image={image ?? firstImage}>
-    <div class="article-wrap">
-        <div class="article">
-            <article>
-                <div class="article__head">
-                    <h1 class="h1">{h1}</h1>
+<Layout
+  title={entry.data.title}
+  description={entry.data.description}
+  image={heroImage}
+  alternates={alternates.length ? alternates : undefined}
+>
+  <div class="article-wrap">
+    <div class="article">
+      <article>
+        <div class="article__head">
+          <h1 class="h1">{entry.data.h1 ?? entry.data.title}</h1>
 
-                    <div class="article__nav">
-                        <div class="article__nav-top">
-                            <div class="article__author author">
-                                <div class="author__photo">
-                                    <a href="/about">
-                                        <picture>
-                                            <img src="/img/avatar.svg" alt={t('name')}>
-                                        </picture>
-                                    </a>
-                                </div>
-
-                                <div class="author__name"><a href={translatePath('/about')} class="author__name">{t('name')}</a></div>
-                            </div>
-
-                            {date &&
-                            <div class="article__date">{date}</div>}
-
-                            {t(`ui.${category}` as any) && <div><a class="category__item category__item--light-blue" href={ensureTrailingSlash(`/${lang === 'en' ? category : lang + '/' + category }`)}>💻 {t(`ui.${category}` as any)}</a></div>}
-
-                        </div>
-                    </div>
+          <div class="article__nav">
+            <div class="article__nav-top">
+              <div class="article__author author">
+                <div class="author__photo">
+                  <a href="/about">
+                    <picture>
+                      <img src={siteConfig.author.avatar} alt={t('name')} />
+                    </picture>
+                  </a>
                 </div>
 
-                {AI && <AIWarning />}
-
-                <div class="text-block article__text-block">
-                    <slot/>
+                <div class="author__name">
+                  <a href={translatePath('/about')} class="author__name">
+                    {t('name')}
+                  </a>
                 </div>
+              </div>
 
-                <div class="post-navigation">
-                    <a href={translatePath('/')}>← {t('ui.back')}</a>
-                    <a href="#" class="scroll-top">↑ {t('ui.top')}</a>
+              {entry.data.date && (
+                <div class="article__date">{publishedDate}</div>
+              )}
+
+              {categoryLabel && (
+                <div>
+                  <a
+                    class="category__item category__item--light-blue"
+                    href={translatePath(`/${categoryKey}`)}
+                  >
+                    {categoryConfig?.icon} {categoryLabel}
+                  </a>
                 </div>
-            </article>
+              )}
+            </div>
+          </div>
         </div>
+
+        {entry.data.aiGenerated && <AIWarning />}
+
+        <div class="text-block article__text-block">
+          <Content />
+        </div>
+
+        {siteConfig.features.postNavigation && (
+          <div class="post-navigation">
+            <a href={translatePath('/')}>← {t('ui.back')}</a>
+            <a href="#" class="scroll-top">↑ {t('ui.top')}</a>
+          </div>
+        )}
+      </article>
     </div>
-    
-    {headings && headings.length > 0 && (
-        <FloatingTOC headings={headings} lang={lang} />
-    )}
-    
+  </div>
+
+  {headings.length > 0 && <FloatingTOC headings={headings} lang={lang} />}
+
+  {siteConfig.features.imageLightbox && (
     <div id="lightbox" class="lightbox" onclick="closeLightbox()">
-        <span class="close">&times;</span>
-        <img class="lightbox-content">
+      <span class="close">&times;</span>
+      <img class="lightbox-content" />
     </div>
-    <script is:inline define:vars={{ siteUrl: SITE_CONFIG.siteUrl }}>
-        window.closeLightbox = function() {
-            document.getElementById("lightbox").style.display = "none";
-        }
+  )}
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const links = document.querySelectorAll('a');
+  {siteConfig.features.imageLightbox && (
+    <script is:inline define:vars={{ siteUrl: siteConfig.siteUrl }}>
+      window.closeLightbox = function () {
+        document.getElementById('lightbox').style.display = 'none';
+      };
 
-            links.forEach(link => {
-                const href = link.getAttribute('href');
+      document.addEventListener('DOMContentLoaded', function () {
+        const links = document.querySelectorAll('a');
 
-                if (!href.startsWith(siteUrl) && !href.startsWith('/') && !href.startsWith('#')) {
-                    link.setAttribute('target', '_blank');
-                    link.setAttribute('rel', 'noopener noreferrer');
-                }
-            });
-            document.querySelectorAll("img").forEach(function(img) {
-                img.onclick = function() {
-                    var lightboxImage = document.querySelector(".lightbox-content");
-                    lightboxImage.src = this.src;
-                    document.getElementById("lightbox").style.display = "flex";
-                };
-            });
-
+        links.forEach((link) => {
+          const href = link.getAttribute('href') || '';
+          if (
+            !href.startsWith(siteUrl) &&
+            !href.startsWith('/') &&
+            !href.startsWith('#')
+          ) {
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+          }
         });
-    </script>
-</Layout>
 
-<style>
+        document.querySelectorAll('img').forEach(function (img) {
+          img.onclick = function () {
+            const lightboxImage = document.querySelector('.lightbox-content');
+            lightboxImage.src = this.src;
+            document.getElementById('lightbox').style.display = 'flex';
+          };
+        });
+      });
+    </script>
+  )}
+
+  <style>
     .lightbox {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.4);
-        align-items: center;
-        justify-content: center;
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+      align-items: center;
+      justify-content: center;
     }
 
     .lightbox-content {
-        margin: auto;
-        display: block;
-        max-width: 100%;
-        max-height: 80%;
-        border-radius: 5px;
-        cursor: zoom-out;
+      margin: auto;
+      display: block;
+      max-width: 100%;
+      max-height: 80%;
+      border-radius: 5px;
+      cursor: zoom-out;
     }
 
     .close {
-        position: absolute;
-        top: 20px;
-        right: 30px;
-        color: #f1f1f1;
-        font-size: 40px;
-        font-weight: bold;
-        cursor: pointer;
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      color: #f1f1f1;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
     }
-
-</style>
+  </style>
+</Layout>

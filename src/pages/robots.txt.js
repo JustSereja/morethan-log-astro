@@ -1,14 +1,14 @@
-import SITE_CONFIG from '../site.config';
+import siteConfig from '@config/site';
 
 export async function GET() {
   const robots = `User-agent: *
 Allow: /
 
-Sitemap: ${SITE_CONFIG.siteUrl}/sitemap-index.xml`;
+Sitemap: ${siteConfig.siteUrl}/sitemap-index.xml`;
 
   return new Response(robots, {
     headers: {
-      'Content-Type': 'text/plain; charset=utf-8'
-    }
+      'Content-Type': 'text/plain; charset=utf-8',
+    },
   });
-} 
+}

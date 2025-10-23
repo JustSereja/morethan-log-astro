@@ -1,0 +1,69 @@
+---
+import LanguageSwitcher from '@components/LanguageSwitcher.astro';
+
+type NavItem = {
+  id: string;
+  href: string;
+  label: string;
+};
+
+type LanguageOption = {
+  code: string;
+  label: string;
+  displayLabel: string;
+  href: string;
+  isActive: boolean;
+  isAvailable: boolean;
+};
+
+interface SiteHeaderProps {
+  lang: string;
+  siteTitle: string;
+  homeHref: string;
+  navItems: NavItem[];
+  languageOptions: LanguageOption[];
+  showSearch: boolean;
+  enableDarkMode: boolean;
+}
+
+const {
+  lang,
+  siteTitle,
+  homeHref,
+  navItems,
+  languageOptions,
+  showSearch,
+  enableDarkMode,
+}: SiteHeaderProps = Astro.props;
+---
+<header class="header">
+  <div class="cont flex">
+    <div class="header__text-logo">
+      <a href={homeHref} class="header__text-logo">
+        {siteTitle}
+      </a>
+    </div>
+    <div class="header__nav">
+      {showSearch && (
+        <button type="button" class="header__search-toggle" aria-label="Toggle search">
+          <span class="header__search-icon">🔎</span>
+        </button>
+      )}
+      {enableDarkMode && (
+        <button type="button" class="header__theme-mode-switcher theme-mode-switcher" data-mode="light">
+          <span class="theme-mode-switcher__icon icon-dark">🌙</span>
+          <span class="theme-mode-switcher__icon icon-light">☀️</span>
+        </button>
+      )}
+      {navItems.map(({ id, href, label }) => (
+        <div class="header__link header__link--desktop" data-nav-item={id}>
+          <a href={href}>{label}</a>
+        </div>
+      ))}
+      <LanguageSwitcher lang={lang} options={languageOptions} />
+      <button type="button" class="header__menu-toggle" aria-label="Toggle menu">
+        <span class="header__menu-icon">☰</span>
+      </button>
+    </div>
+  </div>
+</header>

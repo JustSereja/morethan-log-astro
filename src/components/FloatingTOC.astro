@@ -1,5 +1,5 @@
 ---
-import { useTranslations } from '../i18n/utils';
+import { useTranslations } from '@i18n/utils';
 
 export interface Props {
   headings: Array<{
@@ -13,18 +13,16 @@ export interface Props {
 const { headings, lang } = Astro.props;
 const t = useTranslations(lang);
 
-// Only include h2 headings
-const tocHeadings = headings.filter(h => h.depth === 2);
+const tocHeadings = headings.filter((heading) => heading.depth === 2);
 ---
-
 {tocHeadings.length > 0 && (
   <aside class="floating-toc" aria-label="Table of contents">
     <div class="floating-toc__inner">
       <div class="floating-toc__header">{t('ui.contents')}</div>
       <nav class="floating-toc__nav">
         {tocHeadings.map((heading) => (
-          <a 
-            href={`#${heading.slug}`} 
+          <a
+            href={`#${heading.slug}`}
             class={`floating-toc__link floating-toc__link--level-${heading.depth}`}
             data-level={heading.depth}
           >
@@ -37,7 +35,6 @@ const tocHeadings = headings.filter(h => h.depth === 2);
 )}
 
 <style>
-  /* Hide on mobile and tablets */
   @media (max-width: 1400px) {
     .floating-toc {
       display: none;
@@ -52,14 +49,13 @@ const tocHeadings = headings.filter(h => h.depth === 2);
     width: 220px;
     max-height: 70vh;
     z-index: 10;
+    animation: fadeIn 0.3s ease-out;
   }
 
   .floating-toc__inner {
     padding: 1.5rem 0;
     overflow-y: auto;
     max-height: 70vh;
-    
-    /* Subtle scrollbar */
     scrollbar-width: thin;
     scrollbar-color: var(--border-color) transparent;
   }
@@ -107,8 +103,6 @@ const tocHeadings = headings.filter(h => h.depth === 2);
     position: relative;
   }
 
-
-
   .floating-toc__link:hover {
     opacity: 1;
     color: var(--main-color);
@@ -118,17 +112,15 @@ const tocHeadings = headings.filter(h => h.depth === 2);
     opacity: 1;
     color: var(--main-color);
     border-left-color: var(--main-color);
-    background: linear-gradient(to right, rgba(0,0,0,0.02), transparent);
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.02), transparent);
   }
 
-  /* Dark mode gradient adjustment */
   @media (prefers-color-scheme: dark) {
     .floating-toc__link.active {
-      background: linear-gradient(to right, rgba(255,255,255,0.02), transparent);
+      background: linear-gradient(to right, rgba(255, 255, 255, 0.02), transparent);
     }
   }
 
-  /* Text truncation for long headings */
   .floating-toc__text {
     display: block;
     overflow: hidden;
@@ -136,9 +128,17 @@ const tocHeadings = headings.filter(h => h.depth === 2);
     white-space: nowrap;
   }
 
-  /* Smooth fade in animation */
-  .floating-toc {
-    animation: fadeIn 0.3s ease-out;
+  @media (min-width: 1600px) {
+    .floating-toc {
+      right: calc((100vw - 1200px) / 2 - 280px);
+      max-width: 250px;
+    }
+  }
+
+  @media (min-width: 1920px) {
+    .floating-toc {
+      right: calc((100vw - 1200px) / 2 - 320px);
+    }
   }
 
   @keyframes fadeIn {
@@ -151,96 +151,85 @@ const tocHeadings = headings.filter(h => h.depth === 2);
       transform: translateY(-50%) translateX(0);
     }
   }
-
-  /* For very large screens, position relative to content */
-  @media (min-width: 1600px) {
-    .floating-toc {
-      right: calc((100vw - 1200px) / 2 - 280px);
-      max-width: 250px;
-    }
-  }
-  
-  @media (min-width: 1920px) {
-    .floating-toc {
-      right: calc((100vw - 1200px) / 2 - 320px);
-    }
-  }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const toc = document.querySelector('.floating-toc');
-    if (!toc) return;
+    if (!toc) {
+      return;
+    }
 
-    const links = toc.querySelectorAll('.floating-toc__link');
-    const headings = Array.from(links).map(link => {
-      const id = link.getAttribute('href').slice(1);
-      return document.getElementById(id);
-    }).filter(Boolean);
+    const links = Array.from(toc.querySelectorAll('.floating-toc__link'));
+    const headings = links
+      .map((link) => {
+        const id = link.getAttribute('href')?.slice(1);
+        return id ? document.getElementById(id) : null;
+      })
+      .filter(Boolean);
 
-    // Smooth scrolling with offset
-    links.forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetId = link.getAttribute('href').slice(1);
-        const targetElement = document.getElementById(targetId);
-        
-        if (targetElement) {
-          const offset = 100;
-          const targetPosition = targetElement.offsetTop - offset;
-          
-          window.scrollTo({
-            top: targetPosition,
-            behavior: 'smooth'
-          });
+    const scrollToHeading = (targetId) => {
+      const targetElement = document.getElementById(targetId);
+      if (!targetElement) {
+        return;
+      }
 
-          history.pushState(null, null, `#${targetId}`);
+      const offset = 100;
+      const targetPosition = targetElement.offsetTop - offset;
+      window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+      history.pushState(null, '', `#${targetId}`);
+    };
+
+    links.forEach((link) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        const targetId = link.getAttribute('href')?.slice(1);
+        if (targetId) {
+          scrollToHeading(targetId);
         }
       });
     });
 
-    // Intersection Observer for active state
     const observerOptions = {
       rootMargin: '-100px 0px -70% 0px',
-      threshold: 0
+      threshold: 0,
     };
 
     const activeClass = 'active';
     let currentActiveLink = null;
 
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
+      entries.forEach((entry) => {
         const id = entry.target.getAttribute('id');
-        const correspondingLink = toc.querySelector(`[href="#${id}"]`);
-        
-        if (entry.isIntersecting) {
-          // Remove active class from previous link
+        const correspondingLink = id
+          ? toc.querySelector(`.floating-toc__link[href="#${id}"]`)
+          : null;
+
+        if (entry.isIntersecting && correspondingLink) {
           if (currentActiveLink && currentActiveLink !== correspondingLink) {
             currentActiveLink.classList.remove(activeClass);
           }
-          
-          // Add active class to current link
-          if (correspondingLink) {
-            correspondingLink.classList.add(activeClass);
-            currentActiveLink = correspondingLink;
-          }
+
+          correspondingLink.classList.add(activeClass);
+          currentActiveLink = correspondingLink;
         }
       });
     }, observerOptions);
 
-    // Observe all headings
-    headings.forEach(heading => {
-      if (heading) observer.observe(heading);
+    headings.forEach((heading) => {
+      if (heading) {
+        observer.observe(heading);
+      }
     });
 
-    // Set initial active state based on scroll position
     const setInitialActive = () => {
       const scrollPosition = window.scrollY + 150;
-      
-      for (let i = headings.length - 1; i >= 0; i--) {
-        if (headings[i] && scrollPosition >= headings[i].offsetTop) {
-          links[i].classList.add(activeClass);
-          currentActiveLink = links[i];
+      for (let index = headings.length - 1; index >= 0; index -= 1) {
+        const heading = headings[index];
+        const link = links[index];
+        if (heading && link && scrollPosition >= heading.offsetTop) {
+          link.classList.add(activeClass);
+          currentActiveLink = link;
           break;
         }
       }

@@ -1,0 +1,57 @@
+---
+import Layout from './Layout.astro';
+import siteConfig from '@config/site';
+import { type PageEntry, getPageLanguage } from '@lib/content';
+import { useTranslations, useTranslatedPath } from '@i18n/utils';
+
+const {
+  entry,
+  Content,
+  alternates = [],
+}: {
+  entry: PageEntry;
+  Content: any;
+  alternates?: Array<{ lang: string; url: string }>;
+} = Astro.props;
+
+const lang = getPageLanguage(entry);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+---
+<Layout
+  title={entry.data.title}
+  description={entry.data.description}
+  alternates={alternates}
+>
+  <div class="article-wrap">
+    <div class="article">
+      <article>
+        <div class="article__head">
+          <h1 class="h1">{entry.data.h1 ?? entry.data.title}</h1>
+          <div class="article__nav">
+            <div class="article__nav-top">
+              <div class="article__author author">
+                <div class="author__photo">
+                  <a href={translatePath('/')}>
+                    <picture>
+                      <img src={siteConfig.author.avatar} alt={t('name')} />
+                    </picture>
+                  </a>
+                </div>
+                <div class="author__name">
+                  <a href={translatePath('/about')} class="author__name">
+                    {t('name')}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-block article__text-block">
+          <Content />
+        </div>
+      </article>
+    </div>
+  </div>
+</Layout>

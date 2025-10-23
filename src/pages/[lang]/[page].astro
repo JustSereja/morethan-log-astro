@@ -1,0 +1,58 @@
+---
+import PageLayout from '@layouts/Page.astro';
+import siteConfig from '@config/site';
+import {
+  findTopLevelPage,
+  getPageLanguage,
+  getPagePermalink,
+  getPageTranslations,
+  getTopLevelPageDescriptors,
+} from '@lib/content';
+import {
+  DEFAULT_LOCALE,
+  isSupportedLocale,
+  normalizeLocale,
+} from '@lib/language';
+
+export async function getStaticPaths() {
+  const descriptors = await getTopLevelPageDescriptors();
+
+  return descriptors
+    .filter((descriptor) => descriptor.lang !== DEFAULT_LOCALE)
+    .map((descriptor) => ({
+      params: { lang: descriptor.lang, page: descriptor.slug },
+      props: { translationKey: descriptor.translationKey },
+    }));
+}
+
+const { lang: rawLang, page } = Astro.params;
+
+if (!rawLang || !isSupportedLocale(rawLang) || rawLang === DEFAULT_LOCALE) {
+  return Astro.redirect('/404');
+}
+
+const lang = normalizeLocale(rawLang);
+
+const { translationKey } = Astro.props as { translationKey: string };
+
+const entry = await findTopLevelPage({
+  translationKey,
+  lang,
+  slug: page,
+});
+
+if (!entry) {
+  return Astro.redirect(`/${lang}`);
+}
+
+const translations = await getPageTranslations(entry);
+const alternates = translations
+  .filter((candidate) => candidate.id !== entry.id)
+  .map((candidate) => ({
+    lang: getPageLanguage(candidate),
+    url: new URL(getPagePermalink(candidate), siteConfig.siteUrl).toString(),
+  }));
+
+const { Content } = await entry.render();
+---
+<PageLayout entry={entry} Content={Content} alternates={alternates} />

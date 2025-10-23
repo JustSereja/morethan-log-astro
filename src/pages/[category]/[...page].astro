@@ -1,0 +1,53 @@
+---
+import PostsList from '@layouts/PostsList.astro';
+import siteConfig from '@config/site';
+import {
+  getCategoryConfig,
+  getEnabledCategoryIds,
+  groupPostsByLocales,
+  type PostEntry,
+} from '@lib/content';
+import { DEFAULT_LOCALE } from '@lib/language';
+
+export async function getStaticPaths({ paginate }) {
+  const categories = getEnabledCategoryIds();
+
+  const paths = await Promise.all(
+    categories.map(async (category) => {
+      const [group] = await groupPostsByLocales([DEFAULT_LOCALE], { category });
+      if (!group) {
+        return [];
+      }
+
+      return paginate(group.posts, {
+        pageSize: siteConfig.postsPerPage,
+        params: { category },
+      });
+    }),
+  );
+
+  return paths.flat();
+}
+
+const { page } = Astro.props;
+const { category } = Astro.params;
+const posts = page.data as PostEntry[];
+const lang = DEFAULT_LOCALE;
+const categoryConfig = getCategoryConfig(category);
+
+const categoryLabel =
+  categoryConfig?.label?.[lang] ??
+  categoryConfig?.label?.[DEFAULT_LOCALE] ??
+  category;
+
+const pageTitle = `${siteConfig.title[lang]}: ${categoryLabel}`;
+const pageDescription =
+  categoryConfig?.description?.[lang] ?? siteConfig.description[lang];
+---
+<PostsList
+  title={pageTitle}
+  description={pageDescription}
+  posts={posts}
+  categoryId={category}
+  page={page}
+/>

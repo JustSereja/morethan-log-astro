@@ -1,0 +1,28 @@
+---
+import PostsList from '@layouts/PostsList.astro';
+import siteConfig from '@config/site';
+import { groupPostsByLocales, type PostEntry } from '@lib/content';
+import { listNonDefaultLocales, normalizeLocale } from '@lib/language';
+
+export async function getStaticPaths({ paginate }) {
+  const locales = listNonDefaultLocales();
+  const groups = await groupPostsByLocales(locales);
+
+  return groups.flatMap((group) =>
+    paginate(group.posts, {
+      pageSize: siteConfig.postsPerPage,
+      params: { lang: group.lang },
+    }),
+  );
+}
+
+const { page } = Astro.props;
+const { lang } = Astro.params;
+const posts = page.data as PostEntry[];
+
+const locale = normalizeLocale(lang);
+
+const pageTitle = `${siteConfig.title[locale]} — ${siteConfig.description[locale]}`;
+const pageDescription = siteConfig.author.bio[locale];
+---
+<PostsList title={pageTitle} description={pageDescription} posts={posts} page={page} />

@@ -1,0 +1,109 @@
+---
+import { languages as languageNames } from '@i18n/ui';
+
+interface LanguageOption {
+  code: string;
+  label: string;
+  displayLabel: string;
+  href: string;
+  isActive: boolean;
+  isAvailable: boolean;
+}
+
+interface LanguageSwitcherProps {
+  lang: string;
+  options: LanguageOption[];
+  variant?: 'desktop' | 'mobile';
+}
+
+const {
+  lang,
+  options,
+  variant = 'desktop',
+}: LanguageSwitcherProps = Astro.props;
+
+const languageFlagMap: Record<string, string> = {
+  en: '🇬🇧',
+  ru: '🇷🇺',
+};
+
+const toDisplayCode = (value: string) => value.toLowerCase().split('-')[0];
+const getLanguageFlag = (value: string) => {
+  const normalized = toDisplayCode(value);
+  return languageFlagMap[normalized] ?? normalized.toUpperCase();
+};
+
+const defaultOption = {
+  code: lang,
+  label: lang.toUpperCase(),
+  displayLabel: getLanguageFlag(lang),
+  href: '/',
+  isActive: true,
+  isAvailable: true,
+};
+
+const currentOption =
+  options.find((option) => option.isActive) ?? options[0] ?? defaultOption;
+
+const currentLanguageName =
+  languageNames[currentOption.code as keyof typeof languageNames] ?? currentOption.label;
+const toggleAriaLabel = `Change language, current ${currentLanguageName}`;
+---
+<div
+  class:list={{
+    'language-switcher': true,
+    'language-switcher--mobile': variant === 'mobile',
+  }}
+  data-current-language={lang}
+>
+  <button
+    type="button"
+    class="language-switcher__toggle"
+    aria-haspopup="listbox"
+    aria-expanded="false"
+    aria-label={toggleAriaLabel}
+    title={currentLanguageName}
+  >
+    <span class="language-switcher__label" aria-hidden="true">
+      {currentOption.displayLabel}
+    </span>
+    <span class="language-switcher__label-text">
+      {languageNames[currentOption.code as keyof typeof languageNames] ?? currentOption.label}
+    </span>
+  </button>
+  <ul class="language-switcher__menu" role="listbox" hidden>
+    {options.map((option) => (
+      <li role="none">
+        <a
+          role="option"
+          data-lang={option.code}
+          class:list={{
+            'language-switcher__item': true,
+            'is-active': option.isActive,
+          }}
+          aria-selected={option.isActive}
+          href={option.href}
+          data-available={option.isAvailable ? 'true' : 'false'}
+          aria-label={`Switch language to ${
+            languageNames[option.code as keyof typeof languageNames] ?? option.label
+          }`}
+          title={
+            option.isAvailable
+              ? languageNames[option.code as keyof typeof languageNames] ?? option.label
+              : 'Opens language home'
+          }
+        >
+          <span class="language-switcher__item-flag" aria-hidden="true">
+            {option.displayLabel}
+          </span>
+          <span class="language-switcher__item-label">
+            {languageNames[option.code as keyof typeof languageNames] ?? option.label}
+          </span>
+          {!option.isAvailable && (
+            <span class="language-switcher__item-hint" aria-hidden="true">↺</span>
+          )}
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>

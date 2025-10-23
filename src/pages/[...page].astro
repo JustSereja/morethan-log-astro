@@ -1,24 +1,21 @@
 ---
-import PostsList from "../layouts/PostsList.astro";
-import {getPages} from "../utils/getPages.js";
-import SITE_CONFIG from "../site.config";
+import PostsList from '@layouts/PostsList.astro';
+import siteConfig from '@config/site';
+import { getPosts, type PostEntry } from '@lib/content';
+import { DEFAULT_LOCALE } from '@lib/language';
 
-export async function getStaticPaths({paginate}) {
-    let allPosts = [];
-    try {
-        const posts = import.meta.glob<{frontmatter: any}>('/src/pages/**/*.md', { eager: true });
-        allPosts = Object.entries(posts).map(([filepath, post]) => ({
-            ...post,
-            file: filepath
-        }));
-    } catch (error) {
-        console.error("No markdown files found:", error);
-    }
-
-    const pages = getPages(allPosts, null, 'en');
-    return paginate(pages, {pageSize: SITE_CONFIG.postsPerPage || 10});
+export async function getStaticPaths({ paginate }) {
+  const posts = await getPosts({ lang: DEFAULT_LOCALE });
+  return paginate(posts, { pageSize: siteConfig.postsPerPage });
 }
 
-const {page} = Astro.props;
+const { page } = Astro.props;
+const posts = page.data as PostEntry[];
+const lang = DEFAULT_LOCALE;
 ---
-<PostsList title={`${SITE_CONFIG.title.en}: ${SITE_CONFIG.description.en}`} description={SITE_CONFIG.author.bio.en} page={page} allPosts={page.data} />
+<PostsList
+  title={`${siteConfig.title[lang]} — ${siteConfig.description[lang]}`}
+  description={siteConfig.author.bio[lang]}
+  posts={posts}
+  page={page}
+/>

@@ -1,355 +1,209 @@
 ---
-import SITE_CONFIG from '../site.config';
-import { ensureTrailingSlash, addTrailingSlash } from '../utils/url';
-const { title,
-    description,
-    keywords,
-    hreflang_en, hreflang_ru,
-    prevPageUrl, nextPageUrl,
-    image
-} = Astro.props;
-import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
+import siteConfig from '@config/site';
+import { getEnabledCategoryIds } from '@lib/content';
+import { DEFAULT_LOCALE, isDefaultLocale } from '@lib/language';
+import { ensureTrailingSlash } from '@utils/url';
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '@i18n/utils';
+import PageHead from '@components/layout/PageHead.astro';
+import SiteHeader from '@components/layout/SiteHeader.astro';
+import MobileMenu from '@components/layout/MobileMenu.astro';
+
+type AlternateLink = {
+  lang: string;
+  url: string;
+};
+
+type LayoutProps = {
+  title?: string;
+  description?: string;
+  keywords?: string;
+  image?: string;
+  prevPageUrl?: string;
+  nextPageUrl?: string;
+  alternates?: AlternateLink[];
+};
+
+const {
+  title,
+  description,
+  keywords,
+  image,
+  prevPageUrl,
+  nextPageUrl,
+  alternates = [],
+}: LayoutProps = Astro.props;
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const translatePath = useTranslatedPath(lang);
 
-const url = new URL(Astro.url);
-const currentPath = url.pathname;  // Get path without domain and query parameters
-const baseDomain = SITE_CONFIG.siteUrl; // Base domain for your site
-const categoriesArray = Object.keys(SITE_CONFIG.categories).filter(
-    key => SITE_CONFIG.categories[key].enabled
-);
+const pathname = ensureTrailingSlash(Astro.url.pathname);
+const baseDomain = siteConfig.siteUrl;
+const canonicalUrl = new URL(pathname, baseDomain).toString();
 
-function getLocaleSwitchPath(lang, currentPath) {
-    // Ensure trailing slashes in all returned paths
-    // Check if we're on the home page
-    if (currentPath === '/' || currentPath === '/ru' || currentPath === '/ru/') {
-        return lang === 'ru' ? '/' : '/ru/';
-    }
-    
-    // Check if we're on a pagination page (e.g., /2/ or /ru/2/)
-    const paginationMatch = currentPath.match(/^\/(ru\/)?([\d]+)\/?$/);
-    if (paginationMatch) {
-        // For pagination pages, always redirect to main page of the other language
-        // since we can't guarantee the same page exists
-        return lang === 'ru' ? '/' : '/ru/';
-    }
-    
-    // Check if we're on a category page
-    if (isCategoryPage()) {
-        if (currentPath.startsWith('/ru/')) {
-            return ensureTrailingSlash(currentPath.substring(3));  // Remove '/ru' prefix for English URL
-        } else {
-            return ensureTrailingSlash(`/ru${currentPath}`);  // Add '/ru' prefix for Russian URL
-        }
-    }
-    
-    // Check if we're on a category pagination page (e.g., /blog/2/ or /ru/blog/2/)
-    const categoryPaginationMatch = currentPath.match(/^\/(ru\/)?(blog|projects|technology)\/([\d]+)\/?$/);
-    if (categoryPaginationMatch) {
-        // For category pagination, redirect to the category main page
-        const category = categoryPaginationMatch[2];
-        return lang === 'ru' ? `/${category}/` : `/ru/${category}/`;
-    }
+const categories = getEnabledCategoryIds();
 
-    // For posts with hreflang attributes
-    if (currentPath.startsWith('/ru/')) {
-        if (hreflang_en) {
-            return ensureTrailingSlash(hreflang_en);
-        } else {
-            // If no English version, redirect to English home
-            return '/';
-        }
-    } else {
-        if (hreflang_ru) {
-            return ensureTrailingSlash(hreflang_ru);
-        } else {
-            // If no Russian version, redirect to Russian home
-            return '/ru/';
-        }
-    }
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const parsedAlternates = alternates.map(({ lang, url }) => {
+  try {
+    return { lang, pathname: new URL(url, baseDomain).pathname };
+  } catch {
+    return { lang, pathname: url };
+  }
+});
+
+const alternateMap = new Map(parsedAlternates.map((item) => [item.lang, ensureTrailingSlash(item.pathname)]));
+
+function getLocalePath(targetLang: string): string {
+  const mapped = alternateMap.get(targetLang);
+  if (mapped) {
+    return mapped;
+  }
+
+  const normalizedPath = pathname === '/' ? '' : pathname.replace(/^\//, '');
+  const isCurrentDefault = isDefaultLocale(lang);
+  const contentSlug = isCurrentDefault
+    ? normalizedPath
+    : normalizedPath.replace(new RegExp(`^${escapeRegExp(lang)}/`), '');
+
+  if (targetLang === DEFAULT_LOCALE) {
+    const defaultPath = contentSlug ? `/${contentSlug}` : '/';
+    return ensureTrailingSlash(defaultPath);
+  }
+
+  const candidatePath = contentSlug
+    ? ensureTrailingSlash(`/${targetLang}/${contentSlug}`)
+    : ensureTrailingSlash(`/${targetLang}/`);
+
+  if (pathname === candidatePath) {
+    return candidatePath;
+  }
+
+  return ensureTrailingSlash(`/${targetLang}/`);
 }
 
+const normalizeLanguageCode = (value: string) => value.toLowerCase();
+const toDisplayCode = (value: string) => normalizeLanguageCode(value).split('-')[0];
+const languageFlagMap: Record<string, string> = {
+  en: '🇬🇧',
+  ru: '🇷🇺',
+};
+const getLanguageFlag = (value: string) => {
+  const normalized = toDisplayCode(value);
+  return languageFlagMap[normalized] ?? normalized.toUpperCase();
+};
 
+const languageOptions = siteConfig.languages.map((code) => {
+  const displayCode = toDisplayCode(code);
+  const normalizedCode = normalizeLanguageCode(code);
+  const activeLang = normalizeLanguageCode(lang);
+  const isActive = normalizedCode === activeLang || displayCode === activeLang;
+  const isAvailable =
+    isActive ||
+    alternateMap.has(code) ||
+    alternateMap.has(displayCode) ||
+    alternateMap.has(normalizedCode);
 
-const categoryRegex = new RegExp(`^/(ru/)?(${categoriesArray.join('|')})/(\\d+)/?$`);
+  const fallbackHref =
+    code === DEFAULT_LOCALE ? '/' : ensureTrailingSlash(`/${code}/`);
+  const href = isAvailable ? getLocalePath(code) : fallbackHref;
 
-function generateCanonicalUrl() {
-    const currentPath = Astro.url.pathname;
-    let canonicalPath;
-    
-    // Remove pagination info for canonical URLs (e.g., /2/, /3/)
-    const paginationMatch = currentPath.match(/^(\/(ru\/)?)([\d]+)\/?$/);
-    if (paginationMatch) {
-        canonicalPath = paginationMatch[1]; // Keep only the base path (/ or /ru/)
-    } else {
-        canonicalPath = currentPath;
-    }
-    
-    // Ensure trailing slash
-    canonicalPath = ensureTrailingSlash(canonicalPath);
-    return `${baseDomain}${canonicalPath}`;
-}
+  return {
+    code,
+    label: code.toUpperCase(),
+    displayLabel: getLanguageFlag(code),
+    href,
+    isActive,
+    isAvailable,
+  };
+});
 
-const canonicalUrl = generateCanonicalUrl();
+function isPostListPage(): boolean {
+  const pathname = Astro.url.pathname;
+  const paginatedHome = new RegExp(`^/(?:${siteConfig.languages.join('|')}/)?(\\d+/?)?$`);
+  if (pathname === '/' || paginatedHome.test(pathname)) {
+    return true;
+  }
 
-function extractCategoryFromUrl() {
-    const match = Astro.url.pathname.match(/\/(?:ru\/)?([^\/]+)\/.*/);
-    return match ? match[1] : null;
-}
-// Function to determine if the URL is on a category page
-function isCategoryPage() {
-    // Create a regex to check if the path is in the list of categories
-    const categoryPathRegex = new RegExp(`^/(ru/)?(${categoriesArray.join('|')})/?$`);
-
-    // Check if the current path matches one of the category paths
-    return categoryPathRegex.test(Astro.url.pathname);
-}
-
-// Function to determine if we're on a page with post lists (where search should be shown)
-function isPostListPage() {
-    const pathname = Astro.url.pathname;
-    
-    // Check if it's the home page
-    if (pathname === '/' || pathname === '/ru/' || pathname === '/en/') {
-        return true;
-    }
-    
-    // Check if it's a category page (including paginated versions)
-    const postListRegex = new RegExp(`^/(ru/)?(${categoriesArray.join('|')})/?(\\d+/?)?$`);
-    if (postListRegex.test(pathname)) {
-        return true;
-    }
-    
-    // Check if it's a paginated home page
-    if (/^\/(\d+\/?)?$/.test(pathname) || /^\/ru\/(\d+\/?)?$/.test(pathname)) {
-        return true;
-    }
-    
+  if (!categories.length) {
     return false;
+  }
+
+  const categoryRegex = new RegExp(
+    `^/(?:${siteConfig.languages.join('|')}/)?(${categories.join('|')})(/\\d+/?)?$`
+  );
+  return categoryRegex.test(pathname);
 }
 
 const showSearch = isPostListPage();
 
-// Format hreflang URLs with trailing slashes
-const hreflangEnUrl = hreflang_en ? `${baseDomain}${ensureTrailingSlash(hreflang_en)}` : null;
-const hreflangRuUrl = hreflang_ru ? `${baseDomain}${ensureTrailingSlash(hreflang_ru)}` : null;
+const siteTitleLocalized =
+  siteConfig.title[lang] ?? siteConfig.title[DEFAULT_LOCALE];
+
+const metaTitle = title ?? siteTitleLocalized;
+const metaDescription =
+  description ??
+  siteConfig.description[lang] ??
+  siteConfig.description[DEFAULT_LOCALE];
+const ogImage = image && image.startsWith('http')
+  ? image
+  : `${baseDomain}${image ?? siteConfig.seo.defaultImage}`;
+
+const twitterHandle = siteConfig.seo.twitterHandle
+  ? `@${siteConfig.seo.twitterHandle.replace(/^@/, '')}`
+  : undefined;
+
+const toAbsolute = (url?: string) =>
+  url ? new URL(ensureTrailingSlash(url), baseDomain).toString() : undefined;
+
+const prevAbsolute = toAbsolute(prevPageUrl);
+const nextAbsolute = toAbsolute(nextPageUrl);
+const fallbackDescription = t('ui.description');
+const homeHref = ensureTrailingSlash(`/${isDefaultLocale(lang) ? '' : lang}`);
+const navItems = [
+  {
+    id: 'about',
+    href: translatePath('/about'),
+    label: t('ui.about'),
+  },
+];
 ---
 <!DOCTYPE html>
 <html lang={lang}>
+  <PageHead
+    lang={lang}
+    title={metaTitle}
+    description={metaDescription}
+    keywords={keywords}
+    canonicalUrl={canonicalUrl}
+    alternates={parsedAlternates}
+    prev={prevAbsolute}
+    next={nextAbsolute}
+    ogImage={ogImage}
+    twitterHandle={twitterHandle}
+    baseDomain={baseDomain}
+    fallbackDescription={fallbackDescription}
+  />
+  <body>
+    <div class="page">
+      <SiteHeader
+        lang={lang}
+        siteTitle={siteTitleLocalized}
+        homeHref={homeHref}
+        navItems={navItems}
+        languageOptions={languageOptions}
+        showSearch={showSearch}
+        enableDarkMode={siteConfig.features.darkMode}
+      />
 
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <!-- Security headers -->
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-    
-    <!-- Preconnect to external resources -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    
-    <!-- Switching to the latest version IE -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <MobileMenu lang={lang} navItems={navItems} languageOptions={languageOptions} />
 
-    <!-- Adapting the page for mobile devices -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-
-    <!-- Theme color for mobile browsers -->
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)">
-    
-    <!-- Disable phone number recognition -->
-    <meta name="format-detection" content="telephone=no">
-    <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE">
-
-    <!-- Page title -->
-    <title>{title}</title>
-
-    <!-- Keywords for search engines -->
-    {description && <meta name="description" content={description}>}
-    {keywords && <meta name="keywords" content={keywords}>}
-    <link rel="canonical" href={canonicalUrl} />
-    {hreflang_en && <link rel="alternate" hreflang="en" href={hreflangEnUrl} />}
-    {hreflang_ru && <link rel="alternate" hreflang="ru" href={hreflangRuUrl} />}
-        {(canonicalUrl === `${baseDomain}/` || canonicalUrl === `${baseDomain}/ru/`) &&
-    <link rel="alternate" href={`${baseDomain}/`} hreflang="en" />
-    <link rel="alternate" href={`${baseDomain}/ru/`} hreflang="ru" />}
-    {isCategoryPage() &&
-            <link rel="alternate" href={`${baseDomain}/${extractCategoryFromUrl()}/`} hreflang="en" />
-            <link rel="alternate" href={`${baseDomain}/ru/${extractCategoryFromUrl()}/`} hreflang="ru" />}
-
-    {prevPageUrl && <link rel="prev" href={`${baseDomain}${ensureTrailingSlash(prevPageUrl)}`} />}
-    {nextPageUrl && <link rel="next" href={`${baseDomain}${ensureTrailingSlash(nextPageUrl)}`} />}
-
-    <!-- Остальные мета-теги и элементы -->
-
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content={title || SITE_CONFIG.title[lang] || SITE_CONFIG.title.en}/>
-    <meta property="og:description" content={description || t('ui.description')}/>
-    <meta property="og:url" content={canonicalUrl}/>
-    <meta property="og:image" content={image ? image : `${baseDomain}${SITE_CONFIG.seo.defaultImage}`}/>
-    <meta property="og:type" content="website"/>
-    <meta property="og:locale" content={lang === 'ru' ? 'ru_RU' : 'en_US'}/>
-    <meta property="og:site_name" content={SITE_CONFIG.title[lang] || SITE_CONFIG.title.en}/>
-
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image"/>
-    <meta name="twitter:title" content={title || SITE_CONFIG.title[lang] || SITE_CONFIG.title.en}/>
-    <meta name="twitter:description" content={description || t('ui.description')}/>
-    <meta name="twitter:image" content={image ? image : `${baseDomain}${SITE_CONFIG.seo.defaultImage}`}/>
-    {SITE_CONFIG.seo.twitterHandle && <meta name="twitter:site" content={`@${SITE_CONFIG.seo.twitterHandle}`}/>}
-
-    <link rel="sitemap" href="/sitemap-index.xml" />
-
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap"
-          rel="stylesheet">
-
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-
-    <!-- Styles -->
-    <link rel="stylesheet" href="/css/style.css?_v=20240421212219">
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css?_v=20240421212219">
-    <link rel="stylesheet"
-          href="https://unpkg.com/@highlightjs/cdn-assets@11.4.0/styles/base16/tomorrow-night.min.css?_v=20240421212219">
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/atom-one-dark.min.css?_v=20240421212219"> -->
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/base16/tomorrow-night.min.css?_v=20240421212219"> -->
-    <link rel="manifest" href="/manifest.webmanifest"/>
-    {SITE_CONFIG.features.rss && (
-        <>
-            {/* Main RSS feed (default language) */}
-            <link rel="alternate" type="application/rss+xml" href="/rss.xml" title={`${SITE_CONFIG.title[SITE_CONFIG.defaultLanguage] || SITE_CONFIG.title.en} RSS Feed`} />
-            {/* Language-specific RSS feed */}
-            <link rel="alternate" type="application/rss+xml" href={`/${lang}/rss.xml`} title={`${SITE_CONFIG.title[lang] || SITE_CONFIG.title.en} - ${lang === 'en' ? 'English' : 'Russian'} RSS Feed`} />
-            {/* Alternative language RSS feed */}
-            {lang === 'en' 
-                ? <link rel="alternate" type="application/rss+xml" href="/ru/rss.xml" title={`${SITE_CONFIG.title.ru || SITE_CONFIG.title.en} - Russian RSS Feed`} />
-                : <link rel="alternate" type="application/rss+xml" href="/en/rss.xml" title={`${SITE_CONFIG.title.en} - English RSS Feed`} />
-            }
-        </>
-    )}
-    <meta name="robots" content="index, follow">
-
-    {/* Google Analytics */}
-    {SITE_CONFIG.seo.googleAnalytics && (
-        <>
-            <script async src={`https://www.googletagmanager.com/gtag/js?id=${SITE_CONFIG.seo.googleAnalytics}`}></script>
-            <script is:inline define:vars={{ gaId: SITE_CONFIG.seo.googleAnalytics }}>
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', gaId);
-            </script>
-        </>
-    )}
-
-    <!-- Scripts -->
-    <script defer src="/js/_scripts.js?_v=20240421212219"></script>
-    <script is:inline>
-        // Fix for pages without posts
-        document.addEventListener('DOMContentLoaded', function() {
-            // Override getPosts to handle missing elements safely
-            if (typeof getPosts !== 'undefined') {
-                const originalGetPosts = getPosts;
-                window.getPosts = function(path) {
-                    try {
-                        const posts = [];
-                        const postList = document.querySelectorAll(path);
-                        
-                        postList.forEach((element) => {
-                            const categoryEl = element.querySelector('.category__item');
-                            const titleEl = element.querySelector('.post__title');
-                            const dateEl = element.querySelector('.post__date');
-                            const summaryEl = element.querySelector('.post__summary');
-                            
-                            if (categoryEl && titleEl && dateEl && summaryEl) {
-                                const tags = [];
-                                const tagElements = element.querySelectorAll('.post__tag');
-                                tagElements.forEach(tag => {
-                                    tags.push(tag.innerHTML);
-                                });
-                                
-                                posts.push({
-                                    path: element,
-                                    category: categoryEl.innerHTML,
-                                    title: titleEl.innerHTML,
-                                    date: dateEl.innerHTML,
-                                    description: summaryEl.innerHTML,
-                                    tags: tags
-                                });
-                            }
-                        });
-                        
-                        return posts;
-                    } catch (e) {
-                        console.warn('Error in getPosts:', e);
-                        return [];
-                    }
-                };
-            }
-        });
-    </script>
-</head>
-
-<body>
-<header class="header">
-    <div class="cont flex">
-        <div class="header__text-logo"><a href={ensureTrailingSlash(`/${lang === 'en' ? '' : lang}`)} class="header__text-logo">{SITE_CONFIG.title[lang] || SITE_CONFIG.title.en}</a></div>
-
-        <div class="header__nav">
-            {showSearch && (
-                <button type="button" class="header__search-toggle" aria-label="Toggle search">
-                    <span class="header__search-icon">🔎</span>
-                </button>
-            )}
-            
-            {SITE_CONFIG.features.darkMode && (
-                <button type="button" class="header__theme-mode-switcher theme-mode-switcher" data-mode="light">
-                    <span class="theme-mode-switcher__icon icon-dark">🌙</span>
-                    <span class="theme-mode-switcher__icon icon-light">☀️</span>
-                </button>
-            )}
-
-            <div class="header__link header__link--desktop"><a href={translatePath('/about')}>{t('ui.about')}</a></div>
-            <div class="header__link header__link--desktop">
-                <a href={getLocaleSwitchPath(lang, currentPath)}>{t('ui.other_locale')}</a>
-            </div>
-            
-            <button type="button" class="header__menu-toggle" aria-label="Toggle menu">
-                <span class="header__menu-icon">☰</span>
-            </button>
+      <main class="main">
+        <div class="cont">
+          <slot />
         </div>
+      </main>
     </div>
-</header>
-
-<!-- Mobile menu -->
-<div class="mobile-menu" id="mobile-menu">
-    <div class="cont">
-        <nav class="mobile-menu__nav">
-            <a href={translatePath('/about')} class="mobile-menu__link">{t('ui.about')}</a>
-            <a href={getLocaleSwitchPath(lang, currentPath)} class="mobile-menu__link">{t('ui.other_locale')}</a>
-        </nav>
-    </div>
-</div>
-
-<main>
-    <div class="cont">
-        <slot/>
-    </div>
-</main>
-
-
-<script>
-import '../scripts/theme.js';
-import '../scripts/code-enhance.js';
-import '../scripts/theme-fix.js';
-import '../scripts/mobile-menu.js';
-</script>
-</body>
-
+  </body>
 </html>

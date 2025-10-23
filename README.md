@@ -71,23 +71,37 @@ Open your browser and visit `http://localhost:4321` to see your blog!
 
 ## ⚙️ Configuration
 
-All site configuration is centralized in `src/site.config.ts`:
+All site configuration is centralized in `src/config/site.ts` and fully typed:
 
 ```typescript
-export default {
-  title: "Morethan-Log",
-  description: {
-    en: "A modern blog template built with Astro",
-    ru: "Современный шаблон блога на Astro"
+import type { SiteConfig } from '@config';
+
+const siteConfig: SiteConfig = {
+  siteUrl: 'https://morethan-log-astro.sereja.com',
+  title: {
+    en: 'Morethan-Log',
+    ru: 'Morethan-Log',
   },
-  siteUrl: "https://morethan-log-astro.sereja.com",
+  description: {
+    en: 'A modern blog template built with Astro',
+    ru: 'Современный шаблон блога на Astro',
+  },
   author: {
-    name: "Sereja",
-    email: "demo@morethan-log.com",
-    // ... more options
-  }
-  // ... see full config options in the file
-}
+    name: {
+      en: 'Sereja',
+      ru: 'Серёжа',
+    },
+    email: 'demo@morethan-log.com',
+    avatar: '/img/avatar.svg',
+    bio: {
+      en: 'Full-stack developer passionate about the web.',
+      ru: 'Full-stack разработчик, увлеченный вебом.',
+    },
+  },
+  // ...see the file for the complete option list
+};
+
+export default siteConfig;
 ```
 
 ### Social Links
@@ -96,10 +110,13 @@ Add your social media profiles:
 
 ```typescript
 socialLinks: {
-  github: "https://github.com/JustSereja",
-  twitter: "https://twitter.com/your-twitter",
-  linkedin: "https://linkedin.com/in/your-linkedin",
-  // Add more as needed
+  en: {
+    github: 'https://github.com/yourusername',
+    twitter: 'https://x.com/yourusername',
+  },
+  ru: {
+    github: 'https://github.com/yourusername-ru',
+  },
 }
 ```
 
@@ -112,7 +129,15 @@ categories: {
   blog: {
     enabled: true,
     path: "/blog",
-    icon: "💻"
+    icon: "💻",
+    label: {
+      en: 'Blog',
+      ru: 'Блог',
+    },
+    description: {
+      en: 'Personal thoughts, experiences, and insights',
+      ru: 'Личные мысли, опыт и идеи',
+    },
   },
   // Add more categories
 }
@@ -131,71 +156,64 @@ features: {
 }
 ```
 
+### Date Formats
+
+Control how dates render per language:
+
+```typescript
+dateFormats: {
+  en: {
+    locale: 'en-US',
+    options: { year: 'numeric', month: 'long', day: 'numeric' },
+  },
+  ru: {
+    locale: 'ru-RU',
+    options: { year: 'numeric', month: 'long', day: 'numeric' },
+  },
+}
+```
+
 ## 📝 Writing Posts
 
 ### Creating a New Post
 
 1. Create a new `.md` file in the appropriate directory:
-   - Blog posts: `src/pages/blog/`
-   - Technology posts: `src/pages/technology/`
-   - Projects: `src/pages/projects/`
+   - Blog posts: `src/content/posts/en/blog/`
+   - Technology posts: `src/content/posts/en/technology/`
+   - Projects: `src/content/posts/en/projects/`
 
-2. Add frontmatter:
+2. Add frontmatter using the typed schema:
 
 ```markdown
 ---
-layout: '../../layouts/Post.astro'
 title: 'Your Post Title'
 h1: 'Display Title'
-date: 15.03.2024
-custom_category: 'blog'
-image: '/img/posts/your-image.jpg'
 description: 'A brief description of your post'
+date: '2024-03-15'
+announcement: 'Optional summary shown in lists'
+image: '/img/posts/your-image.jpg'
 ---
 
 Your post content here...
 ```
 
+> The folder path `src/content/posts/<lang>/<category>/` defines the language and category automatically—no extra frontmatter needed.
+
 ### Multi-language Posts
 
-For Russian translations, create the same file structure under `src/pages/ru/`:
+Create a matching file under `src/content/posts/ru/<category>/` with the **same file name**. The build system derives language, category, and translation keys from the folder structure automatically.
 
 ```
-src/pages/blog/my-post.md        # English
-src/pages/ru/blog/my-post.md     # Russian
-```
-
-Add language links in frontmatter:
-
-```markdown
-hreflang_en: '/blog/my-post'
-hreflang_ru: '/ru/blog/my-post'
+src/content/posts/en/blog/my-post.md   # English
+src/content/posts/ru/blog/my-post.md   # Russian
 ```
 
 ### Language Support
 
 The template supports both multilingual and single-language content:
 
-#### Multilingual Posts (Default)
-```yaml
-hreflang_en: '/blog/my-post'
-hreflang_ru: '/ru/blog/my-post'
-```
-
-#### Single-Language Posts
-For content that exists in only one language, simply omit the hreflang for the missing translation:
-
-**English-only post:**
-```yaml
-hreflang_en: '/blog/english-only-post'
-# No hreflang_ru - when users switch to Russian, they'll be redirected to the Russian homepage
-```
-
-**Russian-only post:**
-```yaml
-hreflang_ru: '/ru/blog/russian-only-post'
-# No hreflang_en - when users switch to English, they'll be redirected to the English homepage
-```
+- **Multilingual posts:** keep the same file name across languages so the auto-generated translation key matches.
+- **Single-language posts:** create a single entry; the language switcher gracefully falls back to the homepage of other locales.
 
 This is perfect for:
 - Language-specific announcements
@@ -233,10 +251,10 @@ RSS feeds are automatically linked in the `<head>` of each page:
 
 #### Customizing Default Language
 
-To change which language appears in the main RSS feed, update `defaultLanguage` in `site.config.ts`:
+To change which language appears in the main RSS feed, update `defaultLanguage` in `src/config/site.ts`:
 
 ```typescript
-// site.config.ts
+// src/config/site.ts
 export default {
   // ...
   defaultLanguage: "ru", // Change to make Russian the main feed language
@@ -305,7 +323,7 @@ Create new pages in `src/pages/` using `.astro` or `.md` files.
 
 The template now supports different social links and author names for each language:
 
-1. **Language-Specific Social Links**: Configure different social media profiles for each language in `src/site.config.ts`:
+1. **Language-Specific Social Links**: Configure different social media profiles for each language in `src/config/site.ts`:
    ```javascript
    socialLinks: {
      en: {
