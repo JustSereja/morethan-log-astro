@@ -1,4 +1,4 @@
-import { build } from 'esbuild';
+import { build, context } from 'esbuild';
 import { mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -26,20 +26,8 @@ const buildOptions = {
 };
 
 if (isWatch) {
-  const ctx = await build({
-    ...buildOptions,
-    incremental: true,
-    watch: {
-      onRebuild(error) {
-        if (error) {
-          console.error('[client-build] rebuild failed', error);
-        } else {
-          console.log('[client-build] rebuild succeeded');
-        }
-      },
-    },
-  });
-
+  const ctx = await context(buildOptions);
+  await ctx.watch();
   console.log('[client-build] watching for changes...');
 
   process.on('SIGINT', async () => {
