@@ -19,6 +19,15 @@ export interface SiteCategoryConfig {
   description: LocaleRecord<string>;
 }
 
+export interface SiteNavigationItemConfig {
+  id: string;
+  labelKey?: string;
+  label?: LocaleRecord<string>;
+  translationKey?: string;
+  path?: string;
+  external?: string;
+}
+
 export interface SiteFeatureToggles {
   darkMode: boolean;
   search: boolean;
@@ -47,6 +56,7 @@ export interface SiteConfig {
   featuredImageFallback: string;
   socialLinks: SocialLinkConfig;
   categories: Record<string, SiteCategoryConfig>;
+  navigation: SiteNavigationItemConfig[];
   features: SiteFeatureToggles;
   seo: SiteSeoConfig;
   defaultLanguage: LocaleCode;

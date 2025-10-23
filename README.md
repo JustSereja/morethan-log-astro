@@ -147,6 +147,35 @@ categories: {
 
 - `path` controls the base segment used in URLs (e.g. `/insights`). Keep it to a single segment (with or without the leading slash) and the template will add language prefixes automatically.
 
+### Navigation
+
+Define the header menu in `src/config/site.ts`:
+
+```typescript
+navigation: [
+  {
+    id: 'about',
+    labelKey: 'ui.about', // Uses the translation helper
+    translationKey: 'about', // Links to the page with this translation key
+  },
+  {
+    id: 'projects',
+    labelKey: 'ui.projects',
+    path: '/projects', // Direct path that will be localized automatically
+  },
+  {
+    id: 'github',
+    label: { en: 'GitHub', ru: 'GitHub' },
+    external: 'https://github.com/yourusername',
+  },
+];
+```
+
+- Use `translationKey` to link to pages defined in `src/content/pages/**`; custom `permalink` values are detected automatically per language.
+- Use `path` for simple internal links (without a language prefix); the layout will localize them.
+- Use `external` for outbound URLs.  
+- `labelKey` pulls from `src/i18n/ui.ts`; you can also provide a per-locale `label` override.
+
 ### Features
 
 Toggle features on/off:

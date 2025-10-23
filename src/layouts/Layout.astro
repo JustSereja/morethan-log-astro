@@ -1,6 +1,10 @@
 ---
 import siteConfig from '@config/site';
-import { getEnabledCategoryIds } from '@lib/content';
+import {
+  getEnabledCategoryIds,
+  getPageByTranslationKey,
+  getPagePermalink,
+} from '@lib/content';
 import { DEFAULT_LOCALE, isDefaultLocale } from '@lib/language';
 import { ensureTrailingSlash } from '@utils/url';
 import { getLangFromUrl, useTranslations, useTranslatedPath } from '@i18n/utils';
@@ -161,13 +165,82 @@ const prevAbsolute = toAbsolute(prevPageUrl);
 const nextAbsolute = toAbsolute(nextPageUrl);
 const fallbackDescription = t('ui.description');
 const homeHref = ensureTrailingSlash(`/${isDefaultLocale(lang) ? '' : lang}`);
-const navItems = [
-  {
-    id: 'about',
-    href: translatePath('/about'),
-    label: t('ui.about'),
-  },
-];
+
+type ResolvedNavItem = {
+  id: string;
+  href: string;
+  label: string;
+};
+
+const resolveNavItems = async (): Promise<ResolvedNavItem[]> => {
+  const configs = siteConfig.navigation ?? [];
+  if (!configs.length) {
+    return [];
+  }
+
+  const results = await Promise.all(
+    configs.map(async (item) => {
+      const translatedLabel =
+        (item.labelKey ? t(item.labelKey as any) : null) ?? undefined;
+      const fallbackLabel =
+        item.labelKey ?? item.id;
+      const label =
+        item.label?.[lang] ??
+        item.label?.[DEFAULT_LOCALE] ??
+        translatedLabel ??
+        fallbackLabel;
+
+      if (item.translationKey) {
+        const localizedEntry = await getPageByTranslationKey(item.translationKey, lang);
+        if (localizedEntry) {
+          return {
+            id: item.id,
+            href: getPagePermalink(localizedEntry),
+            label,
+          };
+        }
+
+        const fallbackEntry = await getPageByTranslationKey(
+          item.translationKey,
+          siteConfig.defaultLanguage,
+        );
+
+        if (fallbackEntry) {
+          return {
+            id: item.id,
+            href: getPagePermalink(fallbackEntry),
+            label,
+          };
+        }
+
+        return null;
+      }
+
+      if (item.path) {
+        const normalized = item.path.startsWith('/') ? item.path : `/${item.path}`;
+        return {
+          id: item.id,
+          href: translatePath(normalized),
+          label,
+        };
+      }
+
+      if (item.external) {
+        return {
+          id: item.id,
+          href: item.external,
+          label,
+        };
+      }
+
+      return null;
+    }),
+  );
+
+  return results.filter((value): value is ResolvedNavItem => Boolean(value));
+};
+
+const navItems = await resolveNavItems();
 ---
 <!DOCTYPE html>
 <html lang={lang}>

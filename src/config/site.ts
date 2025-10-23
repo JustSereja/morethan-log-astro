@@ -97,6 +97,14 @@ const siteConfig: SiteConfig = {
     },
   },
 
+  navigation: [
+    {
+      id: 'about',
+      labelKey: 'ui.about',
+      translationKey: 'about',
+    },
+  ],
+
   // Feature toggles
   features: {
     darkMode: true,
