@@ -2,7 +2,9 @@
 import PostsList from '@layouts/PostsList.astro';
 import siteConfig from '@config/site';
 import {
+  findCategoryIdByPathSegment,
   getCategoryConfig,
+  getCategoryPathSegment,
   getEnabledCategoryIds,
   groupPostsByLocales,
   type PostEntry,
@@ -21,7 +23,7 @@ export async function getStaticPaths({ paginate }) {
 
       return paginate(group.posts, {
         pageSize: siteConfig.postsPerPage,
-        params: { category },
+        params: { category: getCategoryPathSegment(category) },
       });
     }),
   );
@@ -30,15 +32,17 @@ export async function getStaticPaths({ paginate }) {
 }
 
 const { page } = Astro.props;
-const { category } = Astro.params;
+const { category: categorySegment } = Astro.params;
+const categoryId =
+  findCategoryIdByPathSegment(categorySegment) ?? categorySegment;
 const posts = page.data as PostEntry[];
 const lang = DEFAULT_LOCALE;
-const categoryConfig = getCategoryConfig(category);
+const categoryConfig = getCategoryConfig(categoryId);
 
 const categoryLabel =
   categoryConfig?.label?.[lang] ??
   categoryConfig?.label?.[DEFAULT_LOCALE] ??
-  category;
+  categoryId;
 
 const pageTitle = `${siteConfig.title[lang]}: ${categoryLabel}`;
 const pageDescription =
@@ -48,6 +52,6 @@ const pageDescription =
   title={pageTitle}
   description={pageDescription}
   posts={posts}
-  categoryId={category}
+  categoryId={categoryId}
   page={page}
 />

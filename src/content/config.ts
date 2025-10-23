@@ -11,6 +11,7 @@ const posts = defineCollection({
     image: z.string().optional(),
     aiGenerated: z.boolean().default(false),
     translationKey: z.string().optional(),
+    permalink: z.string().optional(),
     draft: z.boolean().default(false),
   }),
 });
@@ -22,6 +23,7 @@ const pages = defineCollection({
     h1: z.string().optional(),
     description: z.string().optional(),
     translationKey: z.string().optional(),
+    permalink: z.string().optional(),
     draft: z.boolean().default(false),
   }),
 });

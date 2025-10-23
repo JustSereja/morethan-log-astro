@@ -21,13 +21,73 @@ const CATEGORY_PLACEHOLDERS: Record<string, string> = {
   projects: '/img/posts/placeholder-projects.svg',
 };
 
+const SLASH_TRIM_REGEX = /^\/+|\/+$/g;
+const DOMAIN_PREFIX_REGEX = /^https?:\/\/[^/]+/i;
+
+const trimSlashes = (value: string): string => value.replace(SLASH_TRIM_REGEX, '');
+
+const stripDomain = (value: string): string => value.replace(DOMAIN_PREFIX_REGEX, '');
+
+const normalizePath = (value: string | undefined | null): string | null => {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const withoutDomain = stripDomain(trimmed);
+  const normalized = trimSlashes(withoutDomain);
+  return normalized ? normalized : null;
+};
+
+const pickSegment = (value: string, fallback: string, context?: string): string => {
+  if (!value.includes('/')) {
+    return value;
+  }
+
+  const segments = value.split('/').filter(Boolean);
+  const last = segments.pop();
+  if (!last) {
+    return fallback;
+  }
+
+  if (context) {
+    console.warn(
+      `[content] ${context} "${value}" contains "/" – using "${last}" segment instead.`,
+    );
+  }
+
+  return last;
+};
+
+const getSlugFromPermalink = (
+  candidate: string | undefined,
+  fallback: string,
+  context: string,
+): string => {
+  const normalized = normalizePath(candidate);
+  if (!normalized) {
+    return fallback;
+  }
+
+  return pickSegment(normalized, fallback, context);
+};
+
+const categoryPathSegmentCache = new Map<string, string>();
+
 function derivePostMeta(entry: PostEntry) {
   const segments = entry.slug.split('/');
   const [lang = DEFAULT_LOCALE, category = 'blog', ...rest] = segments;
   const fallbackKey = rest.length > 0 ? rest.join('/') : entry.id;
   const translationKey = entry.data.translationKey ?? fallbackKey;
 
-  return { lang, category, translationKey };
+  const fallbackSlug =
+    rest.length > 0 ? rest[rest.length - 1] : entry.slug.split('/').pop() ?? entry.id;
+
+  return { lang, category, translationKey, fallbackSlug };
 }
 
 function derivePageMeta(entry: PageEntry) {
@@ -36,7 +96,11 @@ function derivePageMeta(entry: PageEntry) {
   const fallbackKey = rest.length > 0 ? rest.join('/') : entry.id;
   const translationKey = entry.data.translationKey ?? fallbackKey;
 
-  return { lang, translationKey };
+  const fallbackSlug =
+    rest.length > 0 ? rest[rest.length - 1] : entry.slug.split('/').pop() ?? entry.id;
+  const fallbackPath = rest.join('/');
+
+  return { lang, translationKey, fallbackSlug, fallbackPath };
 }
 
 export async function getPosts(options: GetPostsOptions = {}) {
@@ -71,15 +135,13 @@ export async function getPageByTranslationKey(
 }
 
 export function getPostPermalink(entry: PostEntry) {
-  const { lang } = derivePostMeta(entry);
-  const slugSegments = entry.slug.split('/');
-  const [, ...rest] = slugSegments;
-  const relativePath = rest.join('/');
+  const { lang, category } = derivePostMeta(entry);
+  const slug = getPostSlug(entry);
+  const categorySegment = getCategoryPathSegment(category);
+  const basePath = `/${categorySegment}/${slug}`;
 
   const isDefaultLang = lang === DEFAULT_LOCALE;
-  const url = isDefaultLang
-    ? `/${relativePath}`
-    : `/${lang}/${relativePath}`;
+  const url = isDefaultLang ? basePath : `/${lang}${basePath}`;
 
   return ensureTrailingSlash(url);
 }
@@ -135,9 +197,9 @@ export function getPageTranslationKey(entry: PageEntry) {
 }
 
 export function getPageSlug(entry: PageEntry) {
-  const segments = entry.slug.split('/');
-  const [, ...rest] = segments;
-  return rest.join('/');
+  const { fallbackPath } = derivePageMeta(entry);
+  const normalized = normalizePath(entry.data.permalink);
+  return normalized ?? fallbackPath;
 }
 
 export function getPagePermalink(entry: PageEntry) {
@@ -169,7 +231,57 @@ export const isCategoryEnabled = (categoryId: string): boolean =>
 
 export const getCategoryConfig = (categoryId: string) => siteConfig.categories[categoryId] ?? null;
 
-export const getPostSlug = (entry: PostEntry): string => entry.slug.split('/').pop() ?? entry.id;
+export function getCategoryPathSegment(categoryId: string): string {
+  if (categoryPathSegmentCache.has(categoryId)) {
+    return categoryPathSegmentCache.get(categoryId)!;
+  }
+
+  const config = siteConfig.categories[categoryId];
+  const fallback = categoryId;
+
+  if (!config) {
+    categoryPathSegmentCache.set(categoryId, fallback);
+    return fallback;
+  }
+
+  const normalized = normalizePath(config.path);
+  if (!normalized) {
+    categoryPathSegmentCache.set(categoryId, fallback);
+    return fallback;
+  }
+
+  const segment = pickSegment(normalized, fallback, `Category "${categoryId}" path`);
+  categoryPathSegmentCache.set(categoryId, segment);
+  return segment;
+}
+
+export function getCategoryPath(categoryId: string): string {
+  return ensureTrailingSlash(`/${getCategoryPathSegment(categoryId)}`);
+}
+
+export function getCategoryPermalink(categoryId: string, lang: string = DEFAULT_LOCALE): string {
+  const basePath = getCategoryPath(categoryId);
+  return lang === DEFAULT_LOCALE
+    ? basePath
+    : ensureTrailingSlash(`/${lang}${basePath}`);
+}
+
+export function findCategoryIdByPathSegment(segment: string): string | null {
+  const normalized = normalizePath(segment) ?? segment;
+  const candidates = Object.keys(siteConfig.categories);
+  for (const candidate of candidates) {
+    if (getCategoryPathSegment(candidate) === normalized) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+export const getPostSlug = (entry: PostEntry): string => {
+  const { fallbackSlug } = derivePostMeta(entry);
+  return getSlugFromPermalink(entry.data.permalink, fallbackSlug, `Post "${entry.id}" permalink`);
+};
 
 export type PostsByLocale = {
   lang: string;

@@ -6,6 +6,7 @@ import siteConfig from '@config/site';
 import {
   type PostEntry,
   getCategoryConfig,
+  getCategoryPath,
   getPostImage,
   getPostPermalink,
   getPostTranslations,
@@ -86,7 +87,7 @@ const alternates = translations
                 <div>
                   <a
                     class="category__item category__item--light-blue"
-                    href={translatePath(`/${categoryKey}`)}
+                    href={translatePath(getCategoryPath(categoryKey))}
                   >
                     {categoryConfig?.icon} {categoryLabel}
                   </a>

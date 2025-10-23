@@ -4,6 +4,7 @@ import {
   getEnabledCategoryIds,
   getPosts,
   getPostCategory,
+  getCategoryPath,
 } from '@lib/content';
 import { DEFAULT_LOCALE } from '@lib/language';
 import { ensureTrailingSlash } from '@utils/url';
@@ -28,7 +29,7 @@ const links = getEnabledCategoryIds()
 
     return {
       key,
-      href: translatePath(`/${key}`),
+      href: translatePath(getCategoryPath(key)),
       label: config.label?.[lang] ?? config.label?.[DEFAULT_LOCALE] ?? key,
       count: counts[key] ?? 0,
     };

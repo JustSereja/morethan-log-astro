@@ -145,6 +145,8 @@ categories: {
 }
 ```
 
+- `path` controls the base segment used in URLs (e.g. `/insights`). Keep it to a single segment (with or without the leading slash) and the template will add language prefixes automatically.
+
 ### Features
 
 Toggle features on/off:
@@ -194,12 +196,39 @@ description: 'A brief description of your post'
 date: '2024-03-15'
 announcement: 'Optional summary shown in lists'
 image: '/img/posts/your-image.jpg'
+permalink: 'my-custom-slug' # Optional: override the URL segment
+aiGenerated: false # Optional: flag AI-assisted content
+translationKey: 'your-shared-key' # Optional: link translations with different filenames
+draft: false # Optional: keep the post out of production builds
 ---
 
 Your post content here...
 ```
 
 > The folder path `src/content/posts/<lang>/<category>/` defines the language and category automatically—no extra frontmatter needed.
+
+#### Optional custom URLs
+
+- **Posts:** Set `permalink` to override just the slug segment (e.g. `permalink: 'case-study-2024'`). Keep it to a single segment; the template combines it with the configured category path and language prefix.
+- **Pages:** Add `permalink` to entries in `src/content/pages/**` when you want a top-level custom route (e.g. `permalink: 'about-me'`). Nested paths (`company/about`) are supported, and each language can provide its own value.
+- **Categories:** Adjust `path` in `src/config/site.ts` to change the category segment (for example `path: '/case-studies'`). All posts in the category and the listing page will pick up the new URL.
+
+The build still links translations by file structure, so `permalink` changes never break cross-language `hreflang` relationships.
+
+#### Post frontmatter reference
+
+| Field | Type | Description | Required | Default |
+| --- | --- | --- | --- | --- |
+| `title` | `string` | Primary title shown in listings and `<title>` tags | ✅ | — |
+| `h1` | `string` | Overrides the in-article heading | ❌ | falls back to `title` |
+| `description` | `string` | SEO/meta description for cards and listings | ❌ | — |
+| `date` | `string` (ISO) | Publication date, used for sorting | ✅ | — |
+| `announcement` | `string` | Short summary displayed on cards | ❌ | — |
+| `image` | `string` | Featured image path or URL | ❌ | Category/ global fallback |
+| `aiGenerated` | `boolean` | Marks content as AI-assisted to surface a banner | ❌ | `false` |
+| `translationKey` | `string` | Manually link translations when filenames differ | ❌ | Derived from folder/filename |
+| `permalink` | `string` | Custom slug for the post URL (single segment) | ❌ | Derived from filename |
+| `draft` | `boolean` | Exclude the post from production builds and feeds | ❌ | `false` |
 
 ### Multi-language Posts
 

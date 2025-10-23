@@ -2,6 +2,7 @@
 import PostLayout from '@layouts/Post.astro';
 import { getCollection } from 'astro:content';
 import {
+  getCategoryPathSegment,
   getPostCategory,
   getPostLanguage,
   getPostSlug,
@@ -22,7 +23,7 @@ export async function getStaticPaths() {
     .map((entry) => ({
       params: {
         lang: getPostLanguage(entry),
-        category: getPostCategory(entry),
+        category: getCategoryPathSegment(getPostCategory(entry)),
         slug: getPostSlug(entry),
       },
       props: { entry },
