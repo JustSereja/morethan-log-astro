@@ -1,5 +1,9 @@
 ---
-import { languages as languageNames } from '@i18n/ui';
+import {
+  getLocaleFlag,
+  getLocaleLabel,
+  resolveLocaleDefinition,
+} from '@config/locales';
 
 interface LanguageOption {
   code: string;
@@ -22,31 +26,37 @@ const {
   variant = 'desktop',
 }: LanguageSwitcherProps = Astro.props;
 
-const languageFlagMap: Record<string, string> = {
-  en: '🇬🇧',
-  ru: '🇷🇺',
-};
+const activeLocale = resolveLocaleDefinition(lang);
+const normalizedLang = activeLocale.code;
 
-const toDisplayCode = (value: string) => value.toLowerCase().split('-')[0];
-const getLanguageFlag = (value: string) => {
-  const normalized = toDisplayCode(value);
-  return languageFlagMap[normalized] ?? normalized.toUpperCase();
-};
-
-const defaultOption = {
-  code: lang,
-  label: lang.toUpperCase(),
-  displayLabel: getLanguageFlag(lang),
+const defaultOption: LanguageOption = {
+  code: normalizedLang,
+  label: getLocaleLabel(normalizedLang),
+  displayLabel: getLocaleFlag(normalizedLang),
   href: '/',
   isActive: true,
   isAvailable: true,
 };
 
-const currentOption =
-  options.find((option) => option.isActive) ?? options[0] ?? defaultOption;
+const mapOptionToLocaleMetadata = (option: LanguageOption): LanguageOption => {
+  const definition = resolveLocaleDefinition(option.code);
 
-const currentLanguageName =
-  languageNames[currentOption.code as keyof typeof languageNames] ?? currentOption.label;
+  return {
+    ...option,
+    code: definition.code,
+    label: option.label ?? getLocaleLabel(definition.code),
+    displayLabel: option.displayLabel ?? getLocaleFlag(definition.code),
+  };
+};
+
+const normalizedOptions = (options.length ? options : [defaultOption]).map(mapOptionToLocaleMetadata);
+
+const currentOption =
+  normalizedOptions.find((option) => option.isActive) ??
+  normalizedOptions[0] ??
+  defaultOption;
+
+const currentLanguageName = currentOption.label;
 const toggleAriaLabel = `Change language, current ${currentLanguageName}`;
 ---
 <div
@@ -54,7 +64,7 @@ const toggleAriaLabel = `Change language, current ${currentLanguageName}`;
     'language-switcher': true,
     'language-switcher--mobile': variant === 'mobile',
   }}
-  data-current-language={lang}
+  data-current-language={currentOption.code}
 >
   <button
     type="button"
@@ -68,11 +78,11 @@ const toggleAriaLabel = `Change language, current ${currentLanguageName}`;
       {currentOption.displayLabel}
     </span>
     <span class="language-switcher__label-text">
-      {languageNames[currentOption.code as keyof typeof languageNames] ?? currentOption.label}
+      {currentOption.label}
     </span>
   </button>
   <ul class="language-switcher__menu" role="listbox" hidden>
-    {options.map((option) => (
+    {normalizedOptions.map((option) => (
       <li role="none">
         <a
           role="option"
@@ -84,20 +94,14 @@ const toggleAriaLabel = `Change language, current ${currentLanguageName}`;
           aria-selected={option.isActive}
           href={option.href}
           data-available={option.isAvailable ? 'true' : 'false'}
-          aria-label={`Switch language to ${
-            languageNames[option.code as keyof typeof languageNames] ?? option.label
-          }`}
-          title={
-            option.isAvailable
-              ? languageNames[option.code as keyof typeof languageNames] ?? option.label
-              : 'Opens language home'
-          }
+          aria-label={`Switch language to ${option.label}`}
+          title={option.isAvailable ? option.label : 'Opens language home'}
         >
           <span class="language-switcher__item-flag" aria-hidden="true">
             {option.displayLabel}
           </span>
           <span class="language-switcher__item-label">
-            {languageNames[option.code as keyof typeof languageNames] ?? option.label}
+            {option.label}
           </span>
           {!option.isAvailable && (
             <span class="language-switcher__item-hint" aria-hidden="true">↺</span>

@@ -1,5 +1,6 @@
 ---
 import { useTranslations } from '@i18n/utils';
+import type { LocaleCode } from '@config/locales';
 
 export interface Props {
   headings: Array<{
@@ -7,7 +8,7 @@ export interface Props {
     text: string;
     slug: string;
   }>;
-  lang: 'en' | 'ru';
+  lang: LocaleCode;
 }
 
 const { headings, lang } = Astro.props;

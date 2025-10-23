@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from '@config/locales';
+
 export type LocaleConfig = {
   defaultLanguage: string;
   languages: string[];
@@ -7,9 +9,23 @@ type LocaleWindow = typeof window & { __LOCALE_CONFIG__?: LocaleConfig };
 
 export const getLocaleConfig = (): LocaleConfig => {
   const raw = (window as LocaleWindow).__LOCALE_CONFIG__;
-  const languages = Array.isArray(raw?.languages) && raw.languages.length ? [...raw.languages] : ['en'];
-  const defaultLanguage = raw?.defaultLanguage ?? languages[0];
-  return { defaultLanguage, languages };
+  const documentLanguage = document.documentElement?.lang ?? '';
+  const normalizedDocumentLanguage = documentLanguage.split('-')[0]?.toLowerCase() || undefined;
+
+  const fallbackLanguage = raw?.defaultLanguage ?? normalizedDocumentLanguage ?? DEFAULT_LOCALE;
+
+  const languages = Array.isArray(raw?.languages) && raw.languages.length
+    ? [...raw.languages]
+    : [fallbackLanguage];
+
+  const uniqueLanguages = Array.from(new Set(languages.filter(Boolean)));
+  const defaultLanguage = raw?.defaultLanguage ?? uniqueLanguages[0] ?? fallbackLanguage;
+
+  if (!uniqueLanguages.length) {
+    uniqueLanguages.push(defaultLanguage ?? DEFAULT_LOCALE);
+  }
+
+  return { defaultLanguage, languages: uniqueLanguages };
 };
 
 export const normalizeLanguage = (lang: string | null | undefined, config: LocaleConfig): string => {

@@ -1,5 +1,5 @@
 import type { SiteConfig } from './types';
-import { SUPPORTED_LANGUAGES } from './types';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './locales';
 
 const siteConfig: SiteConfig = {
   // Basic site information
@@ -125,8 +125,8 @@ const siteConfig: SiteConfig = {
   },
 
   // Language settings
-  defaultLanguage: 'en',
-  languages: [...SUPPORTED_LANGUAGES],
+  defaultLanguage: DEFAULT_LOCALE,
+  languages: [...SUPPORTED_LOCALES],
 
   // Date format settings
   dateFormats: {
@@ -151,4 +151,4 @@ const siteConfig: SiteConfig = {
 
 export default siteConfig;
 export type { SiteConfig } from './types';
-export { SUPPORTED_LANGUAGES };
+export { SUPPORTED_LOCALES, SUPPORTED_LOCALES as SUPPORTED_LANGUAGES } from './locales';

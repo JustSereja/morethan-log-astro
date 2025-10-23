@@ -1,6 +1,4 @@
-export const SUPPORTED_LANGUAGES = ['en', 'ru'] as const;
-
-export type LocaleCode = typeof SUPPORTED_LANGUAGES[number];
+import type { LocaleCode } from './locales';
 
 export type LocaleRecord<T> = Record<LocaleCode, T>;
 
@@ -66,3 +64,5 @@ export interface SiteConfig {
     options: Intl.DateTimeFormatOptions;
   }>;
 }
+
+export type { LocaleCode } from './locales';

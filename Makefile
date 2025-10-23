@@ -33,6 +33,7 @@ update-template:
 		--exclude '.env.*' \
 		--exclude 'src/content/' \
 		--exclude 'src/config/site.ts' \
+		--exclude 'src/config/locales.ts' \
 		--exclude 'public/img/' \
 		--exclude 'public/favicon*' \
 		$(TEMPLATE_TMP)/ ./; \

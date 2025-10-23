@@ -1,5 +1,6 @@
 ---
 import siteConfig from '@config/site';
+import { getOgLocale, resolveLocaleDefinition } from '@config/locales';
 import { DEFAULT_LOCALE, listNonDefaultLocales } from '@lib/language';
 
 type AlternateLink = {
@@ -37,9 +38,17 @@ const {
   fallbackDescription,
 }: PageHeadProps = Astro.props;
 
-const siteTitle = siteConfig.title[lang] ?? siteConfig.title[DEFAULT_LOCALE];
+const currentLocaleDefinition = resolveLocaleDefinition(lang);
+const siteTitle =
+  siteConfig.title[currentLocaleDefinition.code] ??
+  siteConfig.title[DEFAULT_LOCALE] ??
+  Object.values(siteConfig.title)[0];
 const descriptionContent = description ?? fallbackDescription;
-const rssTitleDefault = siteConfig.title[DEFAULT_LOCALE] ?? siteConfig.title.en;
+const rssTitleDefault =
+  siteConfig.title[DEFAULT_LOCALE] ??
+  siteConfig.title[currentLocaleDefinition.code] ??
+  Object.values(siteConfig.title)[0];
+const ogLocale = getOgLocale(currentLocaleDefinition.code);
 ---
 <head>
   <meta charset="utf-8" />
@@ -69,9 +78,13 @@ const rssTitleDefault = siteConfig.title[DEFAULT_LOCALE] ?? siteConfig.title.en;
 
   <link rel="canonical" href={canonicalUrl} />
 
-  {alternates.map(({ lang: alternateLang, pathname }) => (
-    <link rel="alternate" hreflang={alternateLang} href={new URL(pathname, baseDomain).toString()} />
-  ))}
+  {alternates.map(({ lang: alternateLang, pathname }) => {
+    const alternateDefinition = resolveLocaleDefinition(alternateLang);
+    const hreflang = alternateDefinition.langTag ?? alternateDefinition.code;
+    return (
+      <link rel="alternate" hreflang={hreflang} href={new URL(pathname, baseDomain).toString()} />
+    );
+  })}
 
   {prev && <link rel="prev" href={prev} />}
   {next && <link rel="next" href={next} />}
@@ -82,7 +95,7 @@ const rssTitleDefault = siteConfig.title[DEFAULT_LOCALE] ?? siteConfig.title.en;
   <meta property="og:image" content={ogImage} />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content={siteTitle} />
-  <meta property="og:locale" content={lang === 'ru' ? 'ru_RU' : 'en_US'} />
+  <meta property="og:locale" content={ogLocale} />
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={title} />

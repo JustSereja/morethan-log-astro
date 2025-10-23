@@ -5,7 +5,7 @@
 The following improvements have been made to the template:
 
 1. **Site Configuration Centralization**
-   - All customizable options now in `src/config/site.ts`
+   - All customizable options now in `src/config/site.ts` and locale metadata in `src/config/locales.ts`
    - Removed hardcoded author names from posts
    - Social links, categories, and features configurable in one place
 
@@ -45,6 +45,12 @@ Edit `src/config/site.ts`:
 - [ ] Configure features (dark mode, search, RSS, etc.)
 - [ ] Update categories or add new ones
 - [ ] Set your Google Analytics ID (if using)
+
+Edit `src/config/locales.ts`:
+
+- [ ] Confirm locale codes, labels, and switcher order
+- [ ] Update `langTag`, `ogLocale`, and `flag` values for each locale
+- [ ] Mark the correct default locale with `isDefault: true`
 
 #### `package.json`
 - [ ] Update `name` field (currently: "morethan-log-astro")
@@ -136,9 +142,8 @@ Edit `src/config/site.ts`:
 1. [ ] Test language switching on all pages
 2. [ ] Check all category pages load correctly
 3. [ ] Verify RSS feeds:
-   - [ ] Main feed at `/rss.xml` (default language only)
-   - [ ] English feed at `/en/rss.xml`
-   - [ ] Russian feed at `/ru/rss.xml`
+   - [ ] Main feed at `/rss.xml` (default language)
+   - [ ] Locale-specific feeds for every additional language (e.g. `/ru/rss.xml`)
    - [ ] Validate all feeds at https://validator.w3.org/feed/
 4. [ ] Test sitemap generation at `/sitemap-index.xml`
 5. [ ] Verify robots.txt at `/robots.txt`

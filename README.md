@@ -73,7 +73,46 @@ Open your browser and visit `http://localhost:4321` to see your blog!
 
 ## ⚙️ Configuration
 
-All site configuration is centralized in `src/config/site.ts` and fully typed:
+Your core site settings live in `src/config/site.ts`, while locale metadata (codes, labels, flags, language tags, defaults) is defined in `src/config/locales.ts`. Both files are fully typed so your editor can guide you.
+
+### Locale definitions (`src/config/locales.ts`)
+
+```typescript
+const LOCALE_DEFINITIONS = [
+  {
+    code: 'en',
+    label: 'English',
+    nativeLabel: 'English',
+    langTag: 'en-US',
+    ogLocale: 'en_US',
+    flag: '🇬🇧',
+    dir: 'ltr',
+    isDefault: true,
+  },
+  {
+    code: 'ru',
+    label: 'Russian',
+    nativeLabel: 'Русский',
+    langTag: 'ru-RU',
+    ogLocale: 'ru_RU',
+    flag: '🇷🇺',
+    dir: 'ltr',
+  },
+] as const;
+```
+
+- `code` drives URL prefixes, content folder names, and the language switcher.
+- `langTag` becomes the `<html lang>` attribute and informs search engines.
+- `ogLocale` customizes Open Graph metadata for each language.
+- `flag`, `label`, and `nativeLabel` power the UI (change or remove them as you like).
+- Mark exactly one locale with `isDefault: true`; everything else will derive from it.
+
+When you add a new locale:
+1. Extend `LOCALE_DEFINITIONS`.
+2. Provide matching values in `src/config/site.ts` (titles, descriptions, author info, category labels, etc.).
+3. Add or update translations in `src/i18n/ui.ts` to localize UI strings not pulled from config.
+
+### Site settings (`src/config/site.ts`)
 
 ```typescript
 import type { SiteConfig } from '@config';
@@ -433,7 +472,7 @@ make update-template
 This command:
 - Clones the latest `main` branch of the upstream template into `.template-update`
 - Syncs framework, layout, scripts, styles, and assets into your project using `rsync`
-- Leaves your content (`src/content/**`), personal config (`src/config/site.ts`), and images (`public/img/**`, favicons) untouched
+- Leaves your content (`src/content/**`), personal config (`src/config/site.ts`, `src/config/locales.ts`), and images (`public/img/**`, favicons) untouched
 - Cleans up the temporary clone when finished
 - Anything under `public/css/` is considered template-owned; keep personal overrides elsewhere or reapply them after the sync
 
@@ -487,7 +526,7 @@ git restore --source "$TARGET_REF" \
   src/components src/i18n src/layouts src/lib src/pages src/scripts src/utils
 
 # keep your live content and custom site settings
-git checkout -- src/content src/config/site.ts
+git checkout -- src/content src/config/site.ts src/config/locales.ts
 
 npm install
 npx astro sync
@@ -497,6 +536,6 @@ npm run build
 This sequence:
 - Brings in the latest template logic, layouts, scripts, and assets.
 - Leaves `src/content/**` untouched, so your posts and pages stay intact.
-- Restores your own `src/config/site.ts`, keeping personal branding, social links, and other secrets.
+- Restores your own `src/config/site.ts` and `src/config/locales.ts`, keeping personal branding, locale metadata, social links, and other secrets.
 
 Review `git status`, commit the updated files, and (optionally) create a tag for the new version of your site.

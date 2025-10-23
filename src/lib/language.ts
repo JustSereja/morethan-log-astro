@@ -1,8 +1,12 @@
-import siteConfig from '@config/site';
-import type { LocaleCode } from '@config/types';
+import type { LocaleCode } from '@config/locales';
+import {
+  DEFAULT_LOCALE,
+  SUPPORTED_LOCALES as LOCALE_CODES,
+  resolveLocaleCode,
+} from '@config/locales';
 
-export const DEFAULT_LOCALE = siteConfig.defaultLanguage;
-export const SUPPORTED_LOCALES = siteConfig.languages as ReadonlyArray<LocaleCode>;
+export const SUPPORTED_LOCALES = LOCALE_CODES as ReadonlyArray<LocaleCode>;
+export { DEFAULT_LOCALE };
 
 export const isSupportedLocale = (value: string | null | undefined): value is LocaleCode => {
   if (!value) {
@@ -17,11 +21,7 @@ export const normalizeLocale = (value: string | null | undefined): LocaleCode =>
     return DEFAULT_LOCALE;
   }
 
-  const matched = SUPPORTED_LOCALES.find(
-    (locale) => locale.toLowerCase() === value.toLowerCase(),
-  );
-
-  return matched ?? DEFAULT_LOCALE;
+  return resolveLocaleCode(value);
 };
 
 export const isDefaultLocale = (value: string | null | undefined): boolean => {
@@ -34,4 +34,3 @@ export const isDefaultLocale = (value: string | null | undefined): boolean => {
 
 export const listNonDefaultLocales = (): LocaleCode[] =>
   SUPPORTED_LOCALES.filter((locale) => locale !== DEFAULT_LOCALE);
-

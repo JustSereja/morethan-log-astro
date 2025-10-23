@@ -1,11 +1,20 @@
 ---
 import siteConfig from '@config/site';
 import {
+  DEFAULT_LOCALE,
+  SUPPORTED_LOCALES,
+  getLocaleDirection,
+  getLocaleFlag,
+  getLocaleLangTag,
+  getLocaleLabel,
+  resolveLocaleDefinition,
+} from '@config/locales';
+import {
   getEnabledCategoryIds,
   getPageByTranslationKey,
   getPagePermalink,
 } from '@lib/content';
-import { DEFAULT_LOCALE, isDefaultLocale } from '@lib/language';
+import { isDefaultLocale } from '@lib/language';
 import { ensureTrailingSlash } from '@utils/url';
 import { getLangFromUrl, useTranslations, useTranslatedPath } from '@i18n/utils';
 import PageHead from '@components/layout/PageHead.astro';
@@ -37,7 +46,9 @@ const {
   alternates = [],
 }: LayoutProps = Astro.props;
 
-const lang = getLangFromUrl(Astro.url);
+const requestedLang = getLangFromUrl(Astro.url);
+const currentLocaleDefinition = resolveLocaleDefinition(requestedLang);
+const lang = currentLocaleDefinition.code;
 const t = useTranslations(lang);
 const translatePath = useTranslatedPath(lang);
 
@@ -48,6 +59,7 @@ const canonicalUrl = new URL(pathname, baseDomain).toString();
 const categories = getEnabledCategoryIds();
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const localePathPattern = SUPPORTED_LOCALES.map(escapeRegExp).join('|');
 
 const parsedAlternates = alternates.map(({ lang, url }) => {
   try {
@@ -57,7 +69,25 @@ const parsedAlternates = alternates.map(({ lang, url }) => {
   }
 });
 
-const alternateMap = new Map(parsedAlternates.map((item) => [item.lang, ensureTrailingSlash(item.pathname)]));
+const alternateMap = new Map<string, string>();
+
+parsedAlternates.forEach(({ lang: alternateLang, pathname }) => {
+  const normalizedPath = ensureTrailingSlash(pathname);
+  const definition = resolveLocaleDefinition(alternateLang);
+
+  const variants = [
+    alternateLang,
+    alternateLang.toLowerCase(),
+    definition.code,
+    definition.code.toLowerCase(),
+    definition.langTag,
+    definition.langTag.toLowerCase(),
+  ].filter(Boolean) as string[];
+
+  variants.forEach((variant) => {
+    alternateMap.set(variant, normalizedPath);
+  });
+});
 
 function getLocalePath(targetLang: string): string {
   const mapped = alternateMap.get(targetLang);
@@ -87,27 +117,22 @@ function getLocalePath(targetLang: string): string {
   return ensureTrailingSlash(`/${targetLang}/`);
 }
 
-const normalizeLanguageCode = (value: string) => value.toLowerCase();
-const toDisplayCode = (value: string) => normalizeLanguageCode(value).split('-')[0];
-const languageFlagMap: Record<string, string> = {
-  en: '🇬🇧',
-  ru: '🇷🇺',
-};
-const getLanguageFlag = (value: string) => {
-  const normalized = toDisplayCode(value);
-  return languageFlagMap[normalized] ?? normalized.toUpperCase();
-};
+const localeOptionKeys = SUPPORTED_LOCALES.map((code) => resolveLocaleDefinition(code));
+const normalizedActiveCode = lang.toLowerCase();
 
-const languageOptions = siteConfig.languages.map((code) => {
-  const displayCode = toDisplayCode(code);
-  const normalizedCode = normalizeLanguageCode(code);
-  const activeLang = normalizeLanguageCode(lang);
-  const isActive = normalizedCode === activeLang || displayCode === activeLang;
+const languageOptions = localeOptionKeys.map((definition) => {
+  const code = definition.code;
+  const langTag = definition.langTag;
+  const codeLower = code.toLowerCase();
+  const langTagLower = langTag.toLowerCase();
+
+  const isActive = codeLower === normalizedActiveCode || langTagLower === normalizedActiveCode;
   const isAvailable =
     isActive ||
     alternateMap.has(code) ||
-    alternateMap.has(displayCode) ||
-    alternateMap.has(normalizedCode);
+    alternateMap.has(codeLower) ||
+    alternateMap.has(langTag) ||
+    alternateMap.has(langTagLower);
 
   const fallbackHref =
     code === DEFAULT_LOCALE ? '/' : ensureTrailingSlash(`/${code}/`);
@@ -115,17 +140,20 @@ const languageOptions = siteConfig.languages.map((code) => {
 
   return {
     code,
-    label: code.toUpperCase(),
-    displayLabel: getLanguageFlag(code),
+    label: getLocaleLabel(code),
+    displayLabel: getLocaleFlag(code),
     href,
     isActive,
     isAvailable,
   };
 });
 
+const htmlLang = getLocaleLangTag(lang);
+const htmlDir = getLocaleDirection(lang);
+
 function isPostListPage(): boolean {
   const pathname = Astro.url.pathname;
-  const paginatedHome = new RegExp(`^/(?:${siteConfig.languages.join('|')}/)?(\\d+/?)?$`);
+  const paginatedHome = new RegExp(`^/(?:${localePathPattern}/)?(\\d+/?)?$`);
   if (pathname === '/' || paginatedHome.test(pathname)) {
     return true;
   }
@@ -134,8 +162,9 @@ function isPostListPage(): boolean {
     return false;
   }
 
+  const categoryPattern = categories.map(escapeRegExp).join('|');
   const categoryRegex = new RegExp(
-    `^/(?:${siteConfig.languages.join('|')}/)?(${categories.join('|')})(/\\d+/?)?$`
+    `^/(?:${localePathPattern}/)?(${categoryPattern})(/\\d+/?)?$`
   );
   return categoryRegex.test(pathname);
 }
@@ -243,7 +272,7 @@ const resolveNavItems = async (): Promise<ResolvedNavItem[]> => {
 const navItems = await resolveNavItems();
 ---
 <!DOCTYPE html>
-<html lang={lang}>
+<html lang={htmlLang} dir={htmlDir}>
   <PageHead
     lang={lang}
     title={metaTitle}
