@@ -130,14 +130,15 @@ const tocHeadings = headings.filter((heading) => heading.depth === 2);
 
   @media (min-width: 1600px) {
     .floating-toc {
-      right: calc((100vw - 1200px) / 2 - 280px);
-      max-width: 250px;
+      right: max(2rem, calc((100vw - 1200px) / 2 - 280px));
+      width: 280px;
     }
   }
 
   @media (min-width: 1920px) {
     .floating-toc {
       right: calc((100vw - 1200px) / 2 - 320px);
+      width: 300px;
     }
   }
 

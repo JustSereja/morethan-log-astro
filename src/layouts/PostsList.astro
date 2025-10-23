@@ -1,6 +1,9 @@
 ---
 import Layout from './Layout.astro';
 import CategoriesList from '@components/CategoriesList.astro';
+import ProfileCard from '@components/layout/ProfileCard.astro';
+import ContactLinks from '@components/layout/ContactLinks.astro';
+import FooterCopy from '@components/layout/FooterCopy.astro';
 import siteConfig from '@config/site';
 import {
   type PostEntry,
@@ -151,23 +154,7 @@ const categoryDescription = categoryMeta?.description?.[lang] ?? null;
     </aside>
 
     <div class="content-center">
-      <div class="profile profile--mob">
-        <div class="profile__title title">
-          <span class="icon">💻</span> {t('ui.profile')}
-        </div>
-        <div class="profile__content">
-          <div class="profile__content-top">
-            <a href={translatePath('/about')}>
-              <img src={siteConfig.author.avatar} alt={t('name')} />
-            </a>
-          </div>
-          <div class="profile__content-mid">
-            <div class="profile__text">{t('ui.description')}</div>
-          </div>
-        </div>
-      </div>
-
-      <form class="search form hidden" onsubmit="event.preventDefault();">
+     <form class="search form hidden" onsubmit="event.preventDefault();">
         <div class="search__top">
           <span class="search__top-icon">🔎</span> {t('ui.search')}
         </div>
@@ -266,35 +253,19 @@ const categoryDescription = categoryMeta?.description?.[lang] ?? null;
         )}
       </div>
 
-      <div class="footer footer--mob">
-        <div class="footer__copy">
-          Made with <span class="footer__heart">♥</span> by{' '}
-          <a href="https://sereja.com/" target="_blank" rel="noopener noreferrer">
-            Sereja
-          </a>{' '}
-          • {new Date().getFullYear()}
-        </div>
-      </div>
     </div>
 
-    <aside class="aside aside--right">
-      <div class="profile profile--desktop">
-        <div class="profile__title title">
-          <span class="icon">💻</span> {t('ui.profile')}
-        </div>
-        <div class="profile__content">
-          <div class="profile__content-top">
-            <a href={translatePath('/about')}>
-              <img src={siteConfig.author.avatar} alt={t('name')} />
-            </a>
-          </div>
-          <div class="profile__content-mid">
-            <div class="profile__text">{t('ui.description')}</div>
-          </div>
-        </div>
-      </div>
+    <div class="sidebar">
+      <ProfileCard
+        className="sidebar__profile"
+        title={t('ui.profile')}
+        description={t('ui.description')}
+        profileHref={translatePath('/about')}
+        avatarSrc={siteConfig.author.avatar}
+        alt={t('name')}
+      />
 
-      <div class="service">
+      <div class="service sidebar__service">
         <div class="title service__title">
           <span class="icon">🌟</span> {t('ui.projects')}
         </div>
@@ -324,28 +295,13 @@ const categoryDescription = categoryMeta?.description?.[lang] ?? null;
         </div>
       </div>
 
-      <div class="contact">
-        <div class="title contact__title">
-          <span class="icon">💬</span> {t('ui.contacts')}
-        </div>
-        <div class="box-links contact__box-links">
-          {socialLinks.map((link) => (
-            <a href={link.url} rel="noreferrer" target="_blank" class="box-links__link">
-              <span class="box-links__link-name">{link.name}</span>
-            </a>
-          ))}
-        </div>
-      </div>
+      <ContactLinks className="sidebar__contact" title={t('ui.contacts')} links={socialLinks} />
 
-      <div class="footer footer--desktop">
-        <div class="footer__copy">
-          Made with <span class="footer__heart">♥</span> by{' '}
-          <a href="https://sereja.com/" target="_blank" rel="noopener noreferrer">
-            Sereja
-          </a>{' '}
-          • {new Date().getFullYear()}
-        </div>
-      </div>
-    </aside>
+      <FooterCopy
+        className="sidebar__footer"
+        authorName={t('name')}
+        authorUrl="https://sereja.com/"
+      />
+    </div>
   </div>
 </Layout>

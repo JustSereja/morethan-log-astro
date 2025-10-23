@@ -1163,13 +1163,14 @@ a {
     grid-column: span 12/span 12;
 }
 
-.aside--right {
+.sidebar {
     position: sticky;
     top: 63px;
 
     display: none;
     overflow: scroll;
 
+    height: calc(100vh - 73px);
     scrollbar-width: none;
     -ms-overflow-style: none;
     grid-column: span 3/span 3;
@@ -2285,8 +2286,10 @@ a {
         grid-column: span 7/span 7;
     }
 
-    .aside--right {
-        display: block;
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
     }
 
     .tags--mob {
@@ -2307,10 +2310,6 @@ a {
 
     .post__thumbnail {
         padding-bottom: 50%;
-    }
-
-    .profile--mob {
-        display: none;
     }
 
     .profile__content {
@@ -2359,15 +2358,13 @@ a {
         padding-bottom: 0;
     }
 
-    .footer--mob {
-        display: none;
-    }
 }
 
 @media (max-width: 768px) {
     .content {
-        display: block;
-
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
         padding: .5rem 0;
     }
 }
@@ -2430,26 +2427,33 @@ a {
 
 /* Media query for mobile devices */
 @media (max-width: 768px) {
-    /* Display aside--right only for .contact block */
-    .aside--right {
-        display: contents; /* Enable display */
-        position: relative; /* Change positioning if necessary */
-        top: 0; /* Remove top offset */
-        margin-top: 0; /* Remove top margin if present */
-        margin-bottom: 0; /* Remove bottom margin if present */
+    .sidebar {
+        display: contents;
     }
 
-    /* Display only .contact block inside .aside--right */
-    .aside--right > *:not(.contact) {
-        display: none; /* Hide all elements except .contact */
+    .sidebar__service {
+        display: none;
     }
 
-    /* Additional styles for .contact block */
-    .contact {
+    .sidebar__profile {
+        order: 0;
+    }
+
+    .content-center {
+        order: 1;
+    }
+
+    .sidebar__contact {
+        order: 2;
         padding: 10px;
-        background-color: var(--context-bg); /* Use background color variable */
-        border-radius: 8px; /* Round corners */
+        background-color: var(--context-bg);
+        border-radius: 8px;
     }
+
+    .sidebar__footer {
+        order: 3;
+    }
+
     .footer__copy {
         text-align: center;
     }

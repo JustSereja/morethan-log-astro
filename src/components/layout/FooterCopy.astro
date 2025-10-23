@@ -1,0 +1,31 @@
+---
+interface FooterCopyProps {
+  authorName: string;
+  authorUrl: string;
+  className?: string | string[] | Record<string, boolean>;
+}
+
+const { authorName, authorUrl, className }: FooterCopyProps = Astro.props;
+
+const baseClasses = Array.isArray(className)
+  ? className
+  : typeof className === 'string'
+  ? [className]
+  : className && typeof className === 'object'
+  ? Object.entries(className)
+      .filter(([, value]) => Boolean(value))
+      .map(([key]) => key)
+  : [];
+
+const classNames = ['footer', ...baseClasses.filter(Boolean)];
+const currentYear = new Date().getFullYear();
+---
+<div class={classNames.join(' ')}>
+  <div class="footer__copy">
+    Made with <span class="footer__heart">♥</span> by{' '}
+    <a href={authorUrl} target="_blank" rel="noopener noreferrer">
+      {authorName}
+    </a>{' '}
+    • {currentYear}
+  </div>
+</div>

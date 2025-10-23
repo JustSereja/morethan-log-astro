@@ -1,0 +1,39 @@
+---
+interface ContactLink {
+  name: string;
+  url: string;
+}
+
+interface ContactLinksProps {
+  title: string;
+  links: ContactLink[];
+  icon?: string;
+  className?: string | string[] | Record<string, boolean>;
+}
+
+const { title, links, icon = '💬', className }: ContactLinksProps = Astro.props;
+
+const baseClasses = Array.isArray(className)
+  ? className
+  : typeof className === 'string'
+  ? [className]
+  : className && typeof className === 'object'
+  ? Object.entries(className)
+      .filter(([, value]) => Boolean(value))
+      .map(([key]) => key)
+  : [];
+
+const classNames = ['contact', ...baseClasses.filter(Boolean)];
+---
+<div class={classNames.join(' ')}>
+  <div class="title contact__title">
+    <span class="icon">{icon}</span> {title}
+  </div>
+  <div class="box-links contact__box-links">
+    {links.map((link) => (
+      <a href={link.url} rel="noreferrer" target="_blank" class="box-links__link">
+        <span class="box-links__link-name">{link.name}</span>
+      </a>
+    ))}
+  </div>
+</div>

@@ -1,5 +1,6 @@
 ---
 import LanguageSwitcher from '@components/LanguageSwitcher.astro';
+import NavLinks from '@components/layout/NavLinks.astro';
 
 type NavItem = {
   id: string;
@@ -27,11 +28,7 @@ const { lang, navItems, languageOptions }: MobileMenuProps = Astro.props;
 <div class="mobile-menu" id="mobile-menu">
   <div class="cont">
     <nav class="mobile-menu__nav">
-      {navItems.map(({ id, href, label }) => (
-        <a href={href} class="mobile-menu__link" data-nav-item={id}>
-          {label}
-        </a>
-      ))}
+      <NavLinks navItems={navItems} variant="mobile" />
       <LanguageSwitcher lang={lang} options={languageOptions} variant="mobile" />
     </nav>
   </div>
