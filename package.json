@@ -29,6 +29,13 @@
     "dev": "run-p client:watch astro:dev",
     "start": "npm run dev",
     "build": "run-s client:build astro:build",
+    "postbuild": "npm run format:dist",
+    "format:dist": "run-s format:dist:html format:dist:css format:dist:js",
+    "format:dist:html": "js-beautify --config .jsbeautifyrc --replace \"dist/**/*.html\"",
+    "format:dist:css": "run-s optimize:dist:css beautify:dist:css",
+    "optimize:dist:css": "find dist -name \"*.css\" -type f -print0 | xargs -0 -I{} ./node_modules/.bin/csso \"{}\" --comments none --output \"{}\"",
+    "beautify:dist:css": "js-beautify --config .jsbeautifyrc --type css --replace \"dist/**/*.css\"",
+    "format:dist:js": "js-beautify --config .jsbeautifyrc --type js --replace \"dist/**/*.js\"",
     "client:build": "node scripts/build-client.mjs",
     "client:watch": "node scripts/build-client.mjs --watch",
     "astro:dev": "astro dev",
@@ -44,7 +51,11 @@
   "devDependencies": {
     "astro-compress": "^2.3.8",
     "astro-purgecss": "^5.3.0",
+    "csso": "^5.0.5",
+    "csso-cli": "^4.0.2",
     "esbuild": "^0.24.0",
-    "npm-run-all": "^4.1.5"
+    "js-beautify": "^1.15.4",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.6.2"
   }
 }

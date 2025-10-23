@@ -1,0 +1,15 @@
+{
+  "indent_size": 2,
+  "indent_char": " ",
+  "max_preserve_newlines": 2,
+  "wrap_attributes": "auto",
+  "wrap_line_length": 100,
+  "end_with_newline": true,
+  "css": {
+    "indent_size": 2
+  },
+  "js": {
+    "indent_size": 2,
+    "space_in_empty_paren": false
+  }
+}
