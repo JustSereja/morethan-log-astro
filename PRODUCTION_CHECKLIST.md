@@ -4,32 +4,27 @@
 
 The following improvements have been made to the template:
 
-1. **Site Configuration Centralization**
-   - All customizable options now in `src/config/site.ts` and locale metadata in `src/config/locales.ts`
-   - Removed hardcoded author names from posts
-   - Social links, categories, and features configurable in one place
+1. **Configuration**
+   - Settings centralised in `src/config/site.ts` and locale metadata in `src/config/locales.ts`.
+   - Navigation, categories, projects, and contact links resolve per-locale automatically.
+   - Dynamic manifest (`src/pages/manifest.webmanifest.ts`) and robots.txt (`src/pages/robots.txt.js`).
 
-2. **SEO & Performance**
-   - ✅ Added security headers (X-Content-Type-Options, Referrer-Policy)
-   - ✅ Added theme-color meta tags for mobile browsers
-   - ✅ Added preconnect hints for external resources
-   - ✅ Updated robots meta tag for proper indexing
-   - ✅ Fixed RSS feed XML validity with full HTML content
-   - ✅ Multilingual RSS feeds (/rss.xml, /en/rss.xml, /ru/rss.xml)
-   - ✅ Dynamic robots.txt generation
-   - ✅ Simplified sitemap generation
+2. **SEO & Metadata**
+   - ✅ Security headers (CSP upgrade, X-Content-Type-Options, Referrer-Policy).
+   - ✅ Theme-color media queries, canonical links, prev/next pagination tags.
+   - ✅ Locale-aware RSS feeds (`/rss.xml`, `/{lang}/rss.xml`) and sitemap index.
+   - ✅ OpenGraph/Twitter tags resolved from config and post metadata.
 
-### 3. **Performance**
-- ✅ CSS purging enabled (astro-purgecss)
-- ✅ Preconnect to Google Fonts and CDNs
-- ✅ Lazy loading for images in content
-- ✅ Efficient pagination system
+3. **Performance**
+   - ✅ CSS purging via `astro-purgecss` and CSSO minification in post-build script.
+   - ✅ Critical client bundle assembled with esbuild (`scripts/build-client.mjs`).
+   - ✅ Medium-zoom classes whitelisted to avoid PurgeCSS false positives.
+   - ✅ Category/search data injected once per page to keep client scripts lean.
 
-### 4. **Internationalization**
-- ✅ Proper hreflang tags
-- ✅ Language switcher works correctly
-- ✅ Multilingual content support
-- ✅ Proper URL structure for languages
+4. **Internationalization**
+   - ✅ Locale detection in layouts, alternate links, and search.
+   - ✅ Language switcher with persisted preference + redirect handling.
+   - ✅ URL structure mirrors locale folders (e.g., `/ru/...`), fallback content for missing translations.
 
 ## 📋 Required User Actions Before Production
 
@@ -55,15 +50,19 @@ Edit `src/config/locales.ts`:
 #### `package.json`
 - [ ] Update `name` field (currently: "morethan-log-astro")
 - [ ] Update `description` 
-- [ ] Update `author` field (currently: "Morethan-Log Demo")
+- [ ] Update `author` field (currently: "Sereja <demo@morethan-log.com>")
 - [ ] Update `repository` URL (currently points to demo repo)
 - [ ] Update `homepage` URL
 
-#### `public/manifest.webmanifest`
-- [ ] Update name and short_name
-- [ ] Update description
-- [ ] Add proper icons array
-- [ ] Update theme_color to match your brand
+#### Manifest (`src/pages/manifest.webmanifest.ts`)
+- [ ] Update `name`, `short_name`, and `description`
+- [ ] Adjust `start_url` / `scope` if deploying under a sub-path
+- [ ] Point icon definitions to your real favicons (ensure both PNG + SVG as needed)
+- [ ] Set `theme_color` and `background_color` to match your brand palette
+
+#### Footer & Branding
+- [ ] Update `src/components/layout/FooterCopy.astro` with your preferred attribution or replace with a custom component
+- [ ] Swap out any placeholder logos / emojis in navigation, contact, and project links
 
 ### 2. **Replace Assets**
 
@@ -108,6 +107,7 @@ Edit `src/config/locales.ts`:
 - [ ] Consider CDN for static assets
 - [ ] Enable HTTP/2 on your server
 - [ ] Configure proper caching headers
+- [ ] If you remove third-party CDNs, host highlight.js styles/scripts locally via the client bundle
 
 #### Analytics & Monitoring
 - [ ] Set up Google Analytics or alternative
