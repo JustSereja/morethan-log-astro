@@ -21,6 +21,11 @@ interface PageHeadProps {
   twitterHandle?: string;
   baseDomain: string;
   fallbackDescription: string;
+  ogType?: 'website' | 'article';
+  publishedAt?: string;
+  modifiedAt?: string;
+  authorName?: string;
+  section?: string;
 }
 
 const {
@@ -36,6 +41,11 @@ const {
   twitterHandle,
   baseDomain,
   fallbackDescription,
+  ogType = 'website',
+  publishedAt,
+  modifiedAt,
+  authorName,
+  section,
 }: PageHeadProps = Astro.props;
 
 const currentLocaleDefinition = resolveLocaleDefinition(lang);
@@ -49,6 +59,14 @@ const rssTitleDefault =
   siteConfig.title[currentLocaleDefinition.code] ??
   Object.values(siteConfig.title)[0];
 const ogLocale = getOgLocale(currentLocaleDefinition.code);
+const isArticle = ogType === 'article';
+const articleAuthor =
+  authorName ??
+  siteConfig.author.name[currentLocaleDefinition.code] ??
+  siteConfig.author.name[DEFAULT_LOCALE] ??
+  Object.values(siteConfig.author.name)[0];
+const publishedTime = publishedAt ?? null;
+const modifiedTime = modifiedAt ?? publishedTime;
 ---
 <head>
   <meta charset="utf-8" />
@@ -60,6 +78,28 @@ const ogLocale = getOgLocale(currentLocaleDefinition.code);
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+
+  <script is:inline>
+    {`(function() {
+  var storageKey = 'theme';
+  var darkClass = 'dark-mode';
+  var doc = document.documentElement;
+  try {
+    var stored = localStorage.getItem(storageKey);
+    var isStored = stored === 'dark' || stored === 'light';
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var mode = isStored ? stored : (prefersDark ? 'dark' : 'light');
+    if (mode === 'dark') {
+      doc.classList.add(darkClass);
+    } else {
+      doc.classList.remove(darkClass);
+    }
+    doc.dataset.theme = mode;
+  } catch (_) {
+    // ignore access issues
+  }
+})();`}
+  </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -99,9 +139,22 @@ const ogLocale = getOgLocale(currentLocaleDefinition.code);
   <meta property="og:description" content={descriptionContent} />
   <meta property="og:url" content={canonicalUrl} />
   <meta property="og:image" content={ogImage} />
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content={ogType} />
   <meta property="og:site_name" content={siteTitle} />
   <meta property="og:locale" content={ogLocale} />
+  {isArticle && (
+    <>
+      {publishedTime && (
+        <meta property="article:published_time" content={publishedTime} />
+      )}
+      {modifiedTime && (
+        <meta property="article:modified_time" content={modifiedTime} />
+      )}
+      <meta property="article:author" content={articleAuthor} />
+      {section && <meta property="article:section" content={section} />}
+      <meta name="author" content={articleAuthor} />
+    </>
+  )}
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={title} />
@@ -140,11 +193,4 @@ gtag('config', '${siteConfig.seo.googleAnalytics}');`}
       </script>
     </>
   )}
-
-  <script
-    is:inline
-    define:vars={{ localeConfig: { defaultLanguage: DEFAULT_LOCALE, languages: siteConfig.languages } }}
-  >
-    window.__LOCALE_CONFIG__ = localeConfig;
-  </script>
 </head>

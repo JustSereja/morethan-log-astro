@@ -9,6 +9,7 @@ import {
 import { DEFAULT_LOCALE } from '@lib/language';
 
 const isDevelopment = import.meta.env.DEV;
+const MAX_CONTENT_LENGTH = 400;
 
 function cleanMarkdown(body) {
   return body
@@ -30,10 +31,22 @@ export async function GET() {
 
   const payload = posts.map((entry) => ({
     title: entry.data.h1 ?? entry.data.title ?? 'Untitled',
-    description: entry.data.description ?? '',
+    description: entry.data.description ?? entry.data.announcement ?? '',
     url: new URL(getPostPermalink(entry), siteConfig.siteUrl).toString(),
     date: entry.data.date.toISOString(),
-    content: cleanMarkdown(entry.body),
+    content: (() => {
+      const raw = cleanMarkdown(entry.body);
+      if (!raw) {
+        return '';
+      }
+
+      if (raw.length <= MAX_CONTENT_LENGTH) {
+        return raw;
+      }
+
+      const snippet = raw.slice(0, MAX_CONTENT_LENGTH).trim();
+      return `${snippet}…`;
+    })(),
     imageUrl: (() => {
       const image = getPostImage(entry);
       return image.startsWith('http')

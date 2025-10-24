@@ -1,14 +1,26 @@
-import {
-  getLocaleConfig,
-  getLanguageFromPath,
-  getTargetPath,
-  normalizeLanguage,
-} from './locale';
+import { getLocaleConfig, getLanguageFromPath, normalizeLanguage } from './locale';
 
 const SWITCHER_SELECTOR = '.language-switcher';
 const OPEN_CLASS = 'language-switcher--open';
 const STORAGE_KEY = 'userLangPreference';
 const REDIRECT_KEY = 'hasRedirected';
+
+const cleanupRedirectMarker = (() => {
+  let attached = false;
+  return () => {
+    if (attached) {
+      return;
+    }
+    attached = true;
+    window.addEventListener(
+      'beforeunload',
+      () => {
+        sessionStorage.removeItem(REDIRECT_KEY);
+      },
+      { once: true },
+    );
+  };
+})();
 
 const handlePreferenceSync = (() => {
   let handled = false;
@@ -19,23 +31,40 @@ const handlePreferenceSync = (() => {
     handled = true;
 
     const config = getLocaleConfig();
-    const stored = normalizeLanguage(localStorage.getItem(STORAGE_KEY), config);
-    const current = getLanguageFromPath(window.location.pathname, config);
+    const currentNormalized = normalizeLanguage(
+      getLanguageFromPath(window.location.pathname, config),
+      config,
+    );
+    const storedRaw = localStorage.getItem(STORAGE_KEY);
 
-    if (!localStorage.getItem(STORAGE_KEY)) {
-      localStorage.setItem(STORAGE_KEY, current);
+    if (!storedRaw) {
+      localStorage.setItem(STORAGE_KEY, currentNormalized);
+      cleanupRedirectMarker();
       return;
     }
 
-    const hasRedirected = sessionStorage.getItem(REDIRECT_KEY);
-    if (!hasRedirected && stored !== current) {
-      sessionStorage.setItem(REDIRECT_KEY, 'true');
-      window.location.pathname = getTargetPath(stored, config);
+    const stored = normalizeLanguage(storedRaw, config);
+    const hasRedirected = sessionStorage.getItem(REDIRECT_KEY) === 'true';
+
+    if (!hasRedirected && stored !== currentNormalized) {
+      const targetLink = document.querySelector<HTMLAnchorElement>(
+        `${SWITCHER_SELECTOR} .language-switcher__item[data-lang="${stored}"]`,
+      );
+      const isAvailable = targetLink?.dataset.available === 'true';
+      if (isAvailable && targetLink?.href) {
+        sessionStorage.setItem(REDIRECT_KEY, 'true');
+        cleanupRedirectMarker();
+        window.location.href = targetLink.href;
+        return;
+      }
+
+      localStorage.setItem(STORAGE_KEY, currentNormalized);
+      cleanupRedirectMarker();
+      return;
     }
 
-    window.addEventListener('beforeunload', () => {
-      sessionStorage.removeItem(REDIRECT_KEY);
-    }, { once: true });
+    localStorage.setItem(STORAGE_KEY, currentNormalized);
+    cleanupRedirectMarker();
   };
 })();
 

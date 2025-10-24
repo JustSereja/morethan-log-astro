@@ -13,6 +13,7 @@ import {
   getEnabledCategoryIds,
   getPageByTranslationKey,
   getPagePermalink,
+  getCategoryPathSegment,
 } from '@lib/content';
 import { isDefaultLocale } from '@lib/language';
 import { ensureTrailingSlash } from '@utils/url';
@@ -34,6 +35,11 @@ type LayoutProps = {
   prevPageUrl?: string;
   nextPageUrl?: string;
   alternates?: AlternateLink[];
+  ogType?: 'website' | 'article';
+  publishedAt?: string;
+  modifiedAt?: string;
+  authorName?: string;
+  section?: string;
 };
 
 const {
@@ -44,6 +50,11 @@ const {
   prevPageUrl,
   nextPageUrl,
   alternates = [],
+  ogType = 'website',
+  publishedAt,
+  modifiedAt,
+  authorName,
+  section,
 }: LayoutProps = Astro.props;
 
 const requestedLang = getLangFromUrl(Astro.url);
@@ -55,8 +66,16 @@ const translatePath = useTranslatedPath(lang);
 const pathname = ensureTrailingSlash(Astro.url.pathname);
 const baseDomain = siteConfig.siteUrl;
 const canonicalUrl = new URL(pathname, baseDomain).toString();
+const basePath = import.meta.env.BASE_URL ?? '/';
 
 const categories = getEnabledCategoryIds();
+const categorySegments = Array.from(
+  new Set(
+    categories
+      .map((categoryId) => getCategoryPathSegment(categoryId))
+      .filter((segment): segment is string => Boolean(segment)),
+  ),
+);
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const localePathPattern = SUPPORTED_LOCALES.map(escapeRegExp).join('|');
@@ -350,6 +369,11 @@ const navItems = await resolveNavItems();
     twitterHandle={twitterHandle}
     baseDomain={baseDomain}
     fallbackDescription={fallbackDescription}
+    ogType={ogType}
+    publishedAt={publishedAt}
+    modifiedAt={modifiedAt}
+    authorName={authorName}
+    section={section}
   />
   <body>
     <div class="page">
@@ -370,6 +394,21 @@ const navItems = await resolveNavItems();
           <slot />
         </div>
       </main>
+      <script
+        is:inline
+        define:vars={{
+          localeConfig: { defaultLanguage: DEFAULT_LOCALE, languages: siteConfig.languages },
+          searchCategorySegments: categorySegments,
+          basePath,
+        }}
+      >
+        window.__LOCALE_CONFIG__ = localeConfig;
+        window.__SEARCH_CATEGORY_SEGMENTS__ = Array.isArray(searchCategorySegments)
+          ? searchCategorySegments
+          : [];
+        window.__ASTRO_BASE_PATH__ =
+          typeof basePath === 'string' && basePath.length ? basePath : '/';
+      </script>
     </div>
   </body>
 </html>

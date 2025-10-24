@@ -23,7 +23,43 @@ const SEARCH_CONTAINER_SELECTOR = '.search';
 const POSTS_LIST_SELECTOR = '.posts-list';
 const FILTER_SELECTOR = '.filter';
 const SEARCH_TOGGLE_SELECTOR = '.header__search-toggle';
-const CATEGORY_SLUGS = ['technology', 'projects', 'blog'];
+
+type SearchWindow = Window & {
+  __SEARCH_CATEGORY_SEGMENTS__?: unknown;
+  __ASTRO_BASE_PATH__?: unknown;
+};
+
+const getCategorySlugs = (): string[] => {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  const segments = (window as SearchWindow).__SEARCH_CATEGORY_SEGMENTS__;
+  if (!Array.isArray(segments)) {
+    return [];
+  }
+
+  return segments
+    .map((segment) =>
+      typeof segment === 'string'
+        ? segment.trim().replace(/^\//, '').replace(/\/$/, '')
+        : '',
+    )
+    .filter((segment): segment is string => Boolean(segment));
+};
+
+const getBasePath = (): string => {
+  if (typeof window === 'undefined') {
+    return '/';
+  }
+
+  const raw = (window as SearchWindow).__ASTRO_BASE_PATH__;
+  if (typeof raw !== 'string' || !raw.length) {
+    return '/';
+  }
+
+  return raw.endsWith('/') ? raw : `${raw}/`;
+};
 
 let postsCache: SearchPost[] | null = null;
 let debounceTimer: number | undefined;
@@ -33,7 +69,9 @@ const loadPosts = async (): Promise<SearchPost[]> => {
     return postsCache;
   }
 
-  const response = await fetch('/search.json');
+  const normalizedBasePath = getBasePath();
+  const searchIndexUrl = new URL(`${normalizedBasePath}search.json`, window.location.origin);
+  const response = await fetch(searchIndexUrl.toString());
   if (!response.ok) {
     throw new Error(`Failed to fetch search index: ${response.status}`);
   }
@@ -109,7 +147,8 @@ const getCurrentContext = (config: ReturnType<typeof getLocaleConfig>) => {
   const lang = getLanguageFromPath(path, config);
   const normalizedLang = normalizeLanguage(lang, config);
   const normalizedPath = stripLanguageFromPath(path, normalizedLang, config);
-  const category = CATEGORY_SLUGS.find((slug) => normalizedPath.startsWith(`/${slug}`)) ?? null;
+  const slugs = getCategorySlugs();
+  const category = slugs.find((slug) => normalizedPath.startsWith(`/${slug}`)) ?? null;
   return { lang: normalizedLang, category };
 };
 
