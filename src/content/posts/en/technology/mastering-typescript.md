@@ -7,18 +7,18 @@ date: '2024-03-18'
 ![Mastering TypeScript](/img/posts/placeholder.svg)
 TypeScript has become an essential tool in modern web development. Let's explore why it's so powerful and how to use it effectively.
 
-## What is TypeScript?
+## ❓ What is TypeScript?
 
 TypeScript is a strongly typed programming language that builds on JavaScript, giving you better tooling at any scale.
 
-## Key Benefits
+## 🌟 Key Benefits
 
 1. **Type Safety**: Catch errors at compile time
 2. **Better IDE Support**: Autocomplete and refactoring
 3. **Self-Documenting Code**: Types serve as inline documentation
 4. **Easier Refactoring**: Change code with confidence
 
-## Basic Types
+## 🧱 Basic Types
 
 ```typescript
 // Primitive types
@@ -38,9 +38,9 @@ interface User {
 }
 ```
 
-## Advanced Features
+## 🚀 Advanced Features
 
-### Generics
+### 🧬 Generics
 
 ```typescript
 function identity<T>(arg: T): T {
@@ -51,7 +51,7 @@ function identity<T>(arg: T): T {
 let output = identity<string>("myString");
 ```
 
-### Union Types
+### 🔗 Union Types
 
 ```typescript
 type Status = "pending" | "approved" | "rejected";
@@ -61,7 +61,7 @@ function processRequest(status: Status) {
 }
 ```
 
-### Utility Types
+### 🛠️ Utility Types
 
 ```typescript
 interface User {
@@ -77,7 +77,7 @@ type PartialUser = Partial<User>;
 type ReadonlyUser = Readonly<User>;
 ```
 
-## Best Practices
+## ✅ Best Practices
 
 - Start with strict mode enabled
 - Use interfaces for object shapes

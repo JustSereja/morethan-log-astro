@@ -9,7 +9,7 @@ date: '2024-03-20'
 ![Getting Started with Astro](/img/posts/placeholder.svg)
 Astro is revolutionizing the way we build static websites. With its innovative approach to web development, you can create blazing-fast websites that ship zero JavaScript by default.
 
-## Why Choose Astro?
+## 🌟 Why Choose Astro?
 
 Astro brings several compelling advantages:
 
@@ -18,7 +18,7 @@ Astro brings several compelling advantages:
 - **Built for Speed**: Optimized build process and output
 - **Great DX**: Excellent developer experience with hot reloading
 
-## Getting Started
+## 🚀 Getting Started
 
 To create your first Astro project, run:
 
@@ -28,7 +28,7 @@ npm create astro@latest
 
 Follow the prompts and you'll have a working Astro site in minutes!
 
-## Basic Project Structure
+## 🏗️ Basic Project Structure
 
 ```
 my-astro-project/
@@ -40,7 +40,7 @@ my-astro-project/
 └── astro.config.mjs
 ```
 
-## Your First Page
+## 📝 Your First Page
 
 Create a file at `src/pages/index.astro`:
 
@@ -58,7 +58,7 @@ const title = "My Astro Site"
 </html>
 ```
 
-## Next Steps
+## 🔜 Next Steps
 
 - Explore Astro's component system
 - Learn about content collections

@@ -11,29 +11,29 @@ aiGenerated: true
 *Caption: This is an image at the very beginning of the post with an italic caption*
 This post demonstrates all available content elements and typographic styles. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 
-## Heading Level 2
+## ✨ Heading Level 2
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. **This text is bold** and *this text is italic*. You can also use ***bold and italic*** together.
 
-### Heading Level 3
+### 🔤 Heading Level 3
 
 Here's some inline code: `const greeting = "Hello World"` within a paragraph. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 
-#### Heading Level 4
+#### 🧾 Heading Level 4
 
 Text can include [links to external sites](https://example.com) or [internal links](/about). You can also use ~~strikethrough text~~ for corrections.
 
-##### Heading Level 5
+##### 🧠 Heading Level 5
 
 Sometimes you need superscript<sup>2</sup> or subscript<sub>2</sub> for mathematical expressions like H<sub>2</sub>O or E=mc<sup>2</sup>.
 
-###### Heading Level 6
+###### 🧬 Heading Level 6
 
 This is the smallest heading level. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 
-## Lists Showcase
+## 📝 Lists Showcase
 
-### Unordered List
+### 🔹 Unordered List
 
 - First level item
 - Another first level item
@@ -44,7 +44,7 @@ This is the smallest heading level. Lorem ipsum dolor sit amet, consectetur adip
   - Back to second level
 - Back to first level
 
-### Ordered List
+### 🔢 Ordered List
 
 1. First step in the process
 2. Second step with details
@@ -56,14 +56,14 @@ This is the smallest heading level. Lorem ipsum dolor sit amet, consectetur adip
 3. Third main step
 4. Fourth and final step
 
-### Task List
+### ✅ Task List
 
 - [x] Completed task
 - [x] Another completed item
 - [ ] Pending task
 - [ ] Future improvement
 
-## Blockquotes
+## 💬 Blockquotes
 
 > This is a simple blockquote. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Blockquotes are great for highlighting important information or quotes.
 
@@ -75,9 +75,9 @@ This is the smallest heading level. Lorem ipsum dolor sit amet, consectetur adip
 > 
 > > And this is a nested blockquote inside a blockquote.
 
-## Code Blocks
+## 💻 Code Blocks
 
-### JavaScript Example
+### 🟨 JavaScript Example
 
 ```javascript
 // A more complex code example
@@ -105,7 +105,7 @@ const post = new BlogPost(
 );
 ```
 
-### CSS Example
+### 🎨 CSS Example
 
 ```css
 /* Custom styles example */
@@ -123,7 +123,7 @@ const post = new BlogPost(
 }
 ```
 
-### Bash/Shell Example
+### 🖥️ Bash/Shell Example
 
 ```bash
 # Installation commands
@@ -135,16 +135,16 @@ npm run build
 npm run preview
 ```
 
-## Tables
+## 📊 Tables
 
-### Simple Table
+### 🧾 Simple Table
 
 | Header 1 | Header 2 | Header 3 |
 |----------|----------|----------|
 | Cell 1   | Cell 2   | Cell 3   |
 | Cell 4   | Cell 5   | Cell 6   |
 
-### Aligned Table
+### 📐 Aligned Table
 
 | Left Aligned | Center Aligned | Right Aligned | Numbers |
 |:------------|:--------------:|-------------:|--------:|
@@ -152,7 +152,7 @@ npm run preview
 | Lorem ipsum | dolor sit amet | consectetur  | 67.89   |
 | adipiscing  | elit sed       | do eiusmod   | 1,234.56|
 
-### Complex Table with Formatting
+### 🧮 Complex Table with Formatting
 
 | Feature | Description | Status | Priority |
 |---------|-------------|--------|----------|
@@ -164,7 +164,7 @@ npm run preview
 ![Image in the Middle of Content](/img/posts/placeholder.svg)
 *Caption: This demonstrates an image placed in the middle of the article*
 
-## Horizontal Rules
+## ➖ Horizontal Rules
 
 Text before the horizontal rule.
 
@@ -179,9 +179,9 @@ ___
 
 And yet another style.
 
-## Special Content
+## 🌟 Special Content
 
-### Definition Lists (if supported)
+### 📖 Definition Lists (if supported)
 
 Term 1
 : Definition for term 1
@@ -190,15 +190,15 @@ Term 1
 Term 2
 : Definition for term 2
 
-### Keyboard Input
+### ⌨️ Keyboard Input
 
 Press <kbd>Ctrl</kbd> + <kbd>C</kbd> to copy and <kbd>Ctrl</kbd> + <kbd>V</kbd> to paste.
 
-### Abbreviations
+### 🔤 Abbreviations
 
 The <abbr title="World Wide Web Consortium">W3C</abbr> maintains web standards. HTML stands for HyperText Markup Language.
 
-### Mathematical Expressions
+### ➗ Mathematical Expressions
 
 Inline math: $e^{i\pi} + 1 = 0$
 
@@ -208,7 +208,7 @@ $$
 \frac{n!}{k!(n-k)!} = \binom{n}{k}
 $$
 
-## Mixed Content Example
+## 🌀 Mixed Content Example
 
 Here's a paragraph that combines multiple elements. We can have **bold text** with *italics*, `inline code`, and [links](https://example.com). Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 
@@ -217,9 +217,9 @@ Here's a paragraph that combines multiple elements. We can have **bold text** wi
    > With a blockquote inside the list
 3. And continuing with regular text
 
-### Nested Elements Stress Test
+### 🧪 Nested Elements Stress Test
 
-> ### Heading in a Blockquote
+> ### 🎯 Heading in a Blockquote
 > 
 > With a paragraph and a list:
 > 1. First item with **bold**
@@ -230,13 +230,13 @@ Here's a paragraph that combines multiple elements. We can have **bold text** wi
 > const nested = true;
 > ```
 
-## Long-form Content
+## 📜 Long-form Content
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
 
 Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-### Multiple Paragraphs
+### 📚 Multiple Paragraphs
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum. Donec auctor a lacus in tincidunt. Proin blandit, tortor at ultrices tincidunt, elit sapien facilisis lectus.
 
@@ -244,9 +244,9 @@ Nec ullamcorper sit amet risus nullam eget felis. Sed adipiscing diam donec adip
 
 Tristique senectus et netus et malesuada fames ac turpis egestas. Sed vulputate mi sit amet mauris commodo quis imperdiet massa.
 
-## Final Elements
+## 🏁 Final Elements
 
-### Details/Summary (if supported)
+### 🔽 Details/Summary (if supported)
 
 <details>
 <summary>Click to expand this section</summary>
@@ -259,7 +259,7 @@ This is hidden content that appears when you click the summary. Lorem ipsum dolo
 
 </details>
 
-### Footnotes
+### 📝 Footnotes
 
 Here's a sentence with a footnote[^1]. And here's another one[^2].
 
@@ -269,7 +269,7 @@ Here's a sentence with a footnote[^1]. And here's another one[^2].
 ![Image at the End](/img/posts/placeholder.svg)
 *Caption: Final image demonstrating placement at the end of the article*
 
-## Conclusion
+## 🎉 Conclusion
 
 This post has demonstrated all major typographic elements and content types available in Markdown. From basic text formatting to complex nested structures, tables, code blocks, and images at various positions, you can now see how each element renders in your blog's design.
 

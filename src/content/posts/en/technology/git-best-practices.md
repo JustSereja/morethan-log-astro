@@ -7,9 +7,9 @@ description: >-
 date: '2024-03-05'
 ---
 Git is powerful, but with great power comes great responsibility. Here are best practices that will make you a Git pro and a better team player.
-## Commit Messages Matter
+## 📝 Commit Messages Matter
 
-### The Seven Rules
+### 📜 The Seven Rules
 
 1. Separate subject from body with blank line
 2. Limit subject line to 50 characters
@@ -19,7 +19,7 @@ Git is powerful, but with great power comes great responsibility. Here are best 
 6. Wrap body at 72 characters
 7. Explain what and why, not how
 
-### Good vs Bad Examples
+### ⚖️ Good vs Bad Examples
 
 ❌ Bad:
 ```
@@ -34,9 +34,9 @@ The menu items were wrapping incorrectly on screens
 smaller than 768px due to missing flex-wrap property.
 ```
 
-## Branching Strategy
+## 🌿 Branching Strategy
 
-### Git Flow
+### 🪜 Git Flow
 
 ```
 main
@@ -46,23 +46,23 @@ main
       └── hotfix/security-patch
 ```
 
-### Naming Conventions
+### 🏷️ Naming Conventions
 
 - `feature/` - New features
 - `bugfix/` - Bug fixes
 - `hotfix/` - Urgent production fixes
 - `chore/` - Maintenance tasks
 
-## Essential Commands
+## ⌨️ Essential Commands
 
-### Interactive Rebase
+### 🔄 Interactive Rebase
 
 Clean up your commit history:
 ```bash
 git rebase -i HEAD~3
 ```
 
-### Stashing Changes
+### 📦 Stashing Changes
 
 Save work without committing:
 ```bash
@@ -70,14 +70,14 @@ git stash save "work in progress"
 git stash pop
 ```
 
-### Cherry-picking
+### 🍒 Cherry-picking
 
 Apply specific commits:
 ```bash
 git cherry-pick abc123
 ```
 
-## .gitignore Best Practices
+## 🚫 .gitignore Best Practices
 
 Always ignore:
 - OS files (`.DS_Store`, `Thumbs.db`)
@@ -86,47 +86,47 @@ Always ignore:
 - Build outputs (`dist/`, `build/`)
 - Environment files (`.env`)
 
-## Workflow Tips
+## ⚙️ Workflow Tips
 
-### 1. Pull Before Push
+### ⬇️ 1. Pull Before Push
 
 Always sync with remote:
 ```bash
 git pull --rebase origin main
 ```
 
-### 2. Atomic Commits
+### 🧪 2. Atomic Commits
 
 Each commit should:
 - Fix one issue
 - Pass all tests
 - Be reversible
 
-### 3. Review Before Committing
+### 🔍 3. Review Before Committing
 
 ```bash
 git diff --staged
 ```
 
-## Collaboration Guidelines
+## 🤝 Collaboration Guidelines
 
-### Code Reviews
+### 🕵️ Code Reviews
 
 - Keep PRs small and focused
 - Write descriptive PR descriptions
 - Respond to feedback promptly
 - Test locally before approving
 
-### Conflict Resolution
+### 🕊️ Conflict Resolution
 
 1. Communicate with team
 2. Understand both changes
 3. Test after merging
 4. Document decisions
 
-## Advanced Tips
+## 🚀 Advanced Tips
 
-### Aliases for Productivity
+### ⚡ Aliases for Productivity
 
 Add to `~/.gitconfig`:
 ```ini
@@ -138,14 +138,14 @@ Add to `~/.gitconfig`:
   lg = log --oneline --graph --all
 ```
 
-### Hooks for Quality
+### 🪝 Hooks for Quality
 
 Pre-commit hooks for:
 - Linting
 - Running tests
 - Checking commit messages
 
-## Common Mistakes to Avoid
+## ❗ Common Mistakes to Avoid
 
 1. **Force pushing to shared branches**
 2. **Committing sensitive data**
@@ -153,7 +153,7 @@ Pre-commit hooks for:
 4. **Meaningless commit messages**
 5. **Not using branches**
 
-## Conclusion
+## 🎯 Conclusion
 
 Good Git practices lead to:
 - Cleaner project history
