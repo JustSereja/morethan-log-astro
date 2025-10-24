@@ -21,6 +21,7 @@ interface PageHeadProps {
   twitterHandle?: string;
   baseDomain: string;
   fallbackDescription: string;
+  enableCodeHighlight?: boolean;
   ogType?: 'website' | 'article';
   publishedAt?: string;
   modifiedAt?: string;
@@ -41,6 +42,7 @@ const {
   twitterHandle,
   baseDomain,
   fallbackDescription,
+  enableCodeHighlight = false,
   ogType = 'website',
   publishedAt,
   modifiedAt,
@@ -103,12 +105,18 @@ const modifiedTime = modifiedAt ?? publishedTime;
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com/" />
   <link rel="stylesheet" href="/css/style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" />
-  <link rel="stylesheet" href="https://unpkg.com/@highlightjs/cdn-assets@11.4.0/styles/base16/tomorrow-night.min.css" />
+  {enableCodeHighlight && (
+    <>
+      <link rel="preconnect" href="https://cdnjs.cloudflare.com/" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" />
+      <link rel="stylesheet" href="https://unpkg.com/@highlightjs/cdn-assets@11.4.0/styles/base16/tomorrow-night.min.css" />
+    </>
+  )}
   <link rel="manifest" href="/manifest.webmanifest" />
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  {enableCodeHighlight && (
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  )}
   <script type="module" src="/js/main.js"></script>
 
   <title>{title}</title>
