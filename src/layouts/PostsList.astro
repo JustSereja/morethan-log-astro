@@ -12,6 +12,8 @@ import {
   getPostCategory,
   getPostImage,
   getPostPermalink,
+  getPageByTranslationKey,
+  getPagePermalink,
   groupPostsByLocales,
 } from '@lib/content';
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES, isDefaultLocale } from '@lib/language';
@@ -48,6 +50,19 @@ const {
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const translatePath = useTranslatedPath(lang);
+const aboutHref = await (async () => {
+  const localized = await getPageByTranslationKey('about', lang);
+  if (localized) {
+    return getPagePermalink(localized);
+  }
+
+  const fallback = await getPageByTranslationKey('about', DEFAULT_LOCALE);
+  if (fallback) {
+    return getPagePermalink(fallback);
+  }
+
+  return translatePath('/about');
+})();
 
 const prevPageUrl = page.url.prev
   ? ensureTrailingSlash(page.url.prev)
@@ -369,7 +384,7 @@ if (defaultAlternate) {
         className="sidebar__profile"
         title={t('ui.profile')}
         description={t('ui.description')}
-        profileHref={translatePath('/about')}
+        profileHref={aboutHref}
         avatarSrc={siteConfig.author.avatar}
         alt={t('name')}
       />

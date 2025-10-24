@@ -1,7 +1,7 @@
 {
   "name": "morethan-log-astro",
   "type": "module",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "description": "A modern, customizable blog template built with Astro - fast, responsive, and multilingual",
   "author": "Sereja <demo@morethan-log.com>",
   "license": "MIT",
@@ -29,7 +29,8 @@
     "dev": "run-p client:watch astro:dev",
     "start": "npm run dev",
     "build": "run-s client:build astro:build",
-    "postbuild": "npm run format:dist",
+    "postbuild": "run-s copy:404 format:dist",
+    "copy:404": "node scripts/copy-404.mjs",
     "format:dist": "run-s format:dist:html format:dist:css format:dist:js",
     "format:dist:html": "js-beautify --config .jsbeautifyrc --replace \"dist/**/*.html\"",
     "format:dist:css": "run-s optimize:dist:css beautify:dist:css",

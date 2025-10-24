@@ -487,6 +487,8 @@ The template now supports fully configurable contact/social links and author nam
 npm run build
 ```
 
+The build pipeline includes a post-build step that formats the output and copies `dist/404.html` to `dist/404/index.html`. This guarantees that providers expecting a directory-style 404 route (e.g. GitHub Pages, Netlify) correctly serve your not-found page whether the request is for `/404` or `/404.html`.
+
 ## 🔄 Updating the Template
 
 Keeping your project in sync with the upstream template is easiest when you track the original repository and selectively pull in changes.

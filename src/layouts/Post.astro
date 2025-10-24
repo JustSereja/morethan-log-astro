@@ -12,6 +12,8 @@ import {
   getPostTranslations,
   getPostLanguage,
   getPostCategory,
+  getPageByTranslationKey,
+  getPagePermalink,
 } from '@lib/content';
 import { formatDate } from '@lib/format';
 import { DEFAULT_LOCALE } from '@lib/language';
@@ -30,6 +32,19 @@ const {
 const lang = getPostLanguage(entry);
 const t = useTranslations(lang);
 const translatePath = useTranslatedPath(lang);
+const aboutHref = await (async () => {
+  const localized = await getPageByTranslationKey('about', lang);
+  if (localized) {
+    return getPagePermalink(localized);
+  }
+
+  const fallback = await getPageByTranslationKey('about', DEFAULT_LOCALE);
+  if (fallback) {
+    return getPagePermalink(fallback);
+  }
+
+  return translatePath('/about');
+})();
 
 const publishedDate = formatDate(entry.data.date, lang);
 const heroImage = getPostImage(entry);
@@ -102,7 +117,7 @@ const alternates = (() => {
             <div class="article__nav-top">
               <div class="article__author author">
                 <div class="author__photo">
-                  <a href={translatePath('/about')}>
+                  <a href={aboutHref}>
                     <picture>
                       <img src={siteConfig.author.avatar} alt={t('name')} />
                     </picture>
@@ -110,7 +125,7 @@ const alternates = (() => {
                 </div>
 
                 <div class="author__name">
-                  <a href={translatePath('/about')} class="author__name">
+                  <a href={aboutHref} class="author__name">
                     {t('name')}
                   </a>
                 </div>

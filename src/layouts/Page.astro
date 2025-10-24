@@ -1,7 +1,13 @@
 ---
 import Layout from './Layout.astro';
 import siteConfig from '@config/site';
-import { type PageEntry, getPageLanguage } from '@lib/content';
+import {
+  type PageEntry,
+  getPageLanguage,
+  getPageByTranslationKey,
+  getPagePermalink,
+} from '@lib/content';
+import { DEFAULT_LOCALE } from '@lib/language';
 import { useTranslations, useTranslatedPath } from '@i18n/utils';
 
 const {
@@ -17,6 +23,19 @@ const {
 const lang = getPageLanguage(entry);
 const t = useTranslations(lang);
 const translatePath = useTranslatedPath(lang);
+const aboutHref = await (async () => {
+  const localized = await getPageByTranslationKey('about', lang);
+  if (localized) {
+    return getPagePermalink(localized);
+  }
+
+  const fallback = await getPageByTranslationKey('about', DEFAULT_LOCALE);
+  if (fallback) {
+    return getPagePermalink(fallback);
+  }
+
+  return translatePath('/about');
+})();
 ---
 <Layout
   title={entry.data.title}
@@ -39,7 +58,7 @@ const translatePath = useTranslatedPath(lang);
                   </a>
                 </div>
                 <div class="author__name">
-                  <a href={translatePath('/about')} class="author__name">
+                  <a href={aboutHref} class="author__name">
                     {t('name')}
                   </a>
                 </div>
