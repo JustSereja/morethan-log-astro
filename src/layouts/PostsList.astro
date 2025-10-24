@@ -8,11 +8,13 @@ import siteConfig from '@config/site';
 import {
   type PostEntry,
   getCategoryConfig,
+  getCategoryPathSegment,
   getPostCategory,
   getPostImage,
   getPostPermalink,
+  groupPostsByLocales,
 } from '@lib/content';
-import { DEFAULT_LOCALE, isDefaultLocale } from '@lib/language';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES, isDefaultLocale } from '@lib/language';
 import { formatDate } from '@lib/format';
 import { ensureTrailingSlash } from '@utils/url';
 import {
@@ -135,6 +137,77 @@ const currentCategoryLabel = categoryMeta
   : t('ui.all_posts');
 const categoryIcon = categoryMeta?.icon ?? '📂';
 const categoryDescription = categoryMeta?.description?.[lang] ?? null;
+
+const currentPageNumber = page.currentPage ?? 1;
+const postsPerPage = Math.max(1, siteConfig.postsPerPage || 1);
+const categorySegment = categoryId ? getCategoryPathSegment(categoryId) : null;
+
+const buildBasePathForLocale = (localeCode: string): string => {
+  const isDefault = localeCode.toLowerCase() === DEFAULT_LOCALE.toLowerCase();
+  const categoryPath = categorySegment ? `/${categorySegment}` : '';
+  const basePath = isDefault ? categoryPath || '/' : `/${localeCode}${categoryPath}`;
+  return ensureTrailingSlash(basePath);
+};
+
+const buildPathForLocale = (localeCode: string): string => {
+  const basePath = buildBasePathForLocale(localeCode);
+  if (currentPageNumber <= 1) {
+    return basePath;
+  }
+
+  const pagedPath = `${basePath}${currentPageNumber}`;
+  return ensureTrailingSlash(pagedPath);
+};
+
+const localeGroups = await groupPostsByLocales(SUPPORTED_LOCALES, {
+  category: categoryId,
+});
+
+const alternateEntries = new Map<string, { lang: string; path: string }>();
+
+const registerAlternate = (localeCode: string) => {
+  const normalizedCode = localeCode.toLowerCase();
+  if (alternateEntries.has(normalizedCode)) {
+    return;
+  }
+
+  const resolvedCode =
+    SUPPORTED_LOCALES.find((candidate) => candidate.toLowerCase() === normalizedCode) ??
+    localeCode;
+
+  alternateEntries.set(normalizedCode, {
+    lang: resolvedCode,
+    path: buildPathForLocale(resolvedCode),
+  });
+};
+
+registerAlternate(lang);
+
+for (const group of localeGroups) {
+  const totalPages = Math.ceil(group.posts.length / postsPerPage);
+  if (totalPages === 0) {
+    continue;
+  }
+
+  if (currentPageNumber > totalPages) {
+    continue;
+  }
+
+  registerAlternate(group.lang);
+}
+
+const alternates = Array.from(alternateEntries.values()).map(({ lang: localeCode, path }) => ({
+  lang: localeCode,
+  url: new URL(path, siteConfig.siteUrl).toString(),
+}));
+
+const defaultAlternate = alternateEntries.get(DEFAULT_LOCALE.toLowerCase());
+if (defaultAlternate) {
+  alternates.push({
+    lang: 'x-default',
+    url: new URL(defaultAlternate.path, siteConfig.siteUrl).toString(),
+  });
+}
 ---
 <Layout
   title={title}
@@ -142,6 +215,7 @@ const categoryDescription = categoryMeta?.description?.[lang] ?? null;
   keywords={keywords}
   prevPageUrl={prevPageUrl}
   nextPageUrl={nextPageUrl}
+  alternates={alternates}
 >
   <div class="content">
     <aside class="aside aside--left">

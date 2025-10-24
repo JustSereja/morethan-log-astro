@@ -195,7 +195,7 @@ navigation: [
   {
     id: 'about',
     labelKey: 'ui.about', // Uses the translation helper
-    translationKey: 'about', // Links to the page with this translation key
+    translationKey: 'about', // Targets the localized page whose filename (minus locale) is "about"
   },
   {
     id: 'projects',
@@ -210,7 +210,7 @@ navigation: [
 ];
 ```
 
-- Use `translationKey` to link to pages defined in `src/content/pages/**`; custom `permalink` values are detected automatically per language.
+- Use `translationKey` to link to pages defined in `src/content/pages/**`; no frontmatter is needed—identifiers are derived from each file's path automatically, even when per-locale `permalink` values differ.
 - Use `path` for simple internal links (without a language prefix); the layout will localize them.
 - Use `external` for outbound URLs.  
 - `labelKey` pulls from `src/i18n/ui.ts`; you can also provide a per-locale `label` override.
@@ -266,7 +266,6 @@ announcement: 'Optional summary shown in lists'
 image: '/img/posts/your-image.jpg'
 permalink: 'my-custom-slug' # Optional: override the URL segment
 aiGenerated: false # Optional: flag AI-assisted content
-translationKey: 'your-shared-key' # Optional: link translations with different filenames
 draft: false # Optional: keep the post out of production builds
 ---
 
@@ -294,13 +293,12 @@ The build still links translations by file structure, so `permalink` changes nev
 | `announcement` | `string` | Short summary displayed on cards | ❌ | — |
 | `image` | `string` | Featured image path or URL | ❌ | Category/ global fallback |
 | `aiGenerated` | `boolean` | Marks content as AI-assisted to surface a banner | ❌ | `false` |
-| `translationKey` | `string` | Manually link translations when filenames differ | ❌ | Derived from folder/filename |
 | `permalink` | `string` | Custom slug for the post URL (single segment) | ❌ | Derived from filename |
-| `draft` | `boolean` | Exclude the post from production builds and feeds | ❌ | `false` |
+| `draft` | `boolean` | Exclude the entire translation set from production builds, feeds, search, and sitemaps | ❌ | `false` |
 
 ### Multi-language Posts
 
-Create a matching file under `src/content/posts/ru/<category>/` with the **same file name**. The build system derives language, category, and translation keys from the folder structure automatically.
+Create a matching file under `src/content/posts/ru/<category>/` with the **same file name**. The build system derives language, category, and cross-language links from the folder structure automatically.
 
 ```
 src/content/posts/en/blog/my-post.md   # English
@@ -311,7 +309,7 @@ src/content/posts/ru/blog/my-post.md   # Russian
 
 The template supports both multilingual and single-language content:
 
-- **Multilingual posts:** keep the same file name across languages so the auto-generated translation key matches.
+- **Multilingual posts:** keep the same file name across languages so the auto-generated cross-link stays in sync.
 - **Single-language posts:** create a single entry; the language switcher gracefully falls back to the homepage of other locales.
 
 This is perfect for:

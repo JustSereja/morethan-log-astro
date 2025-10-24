@@ -79,11 +79,17 @@ const ogLocale = getOgLocale(currentLocaleDefinition.code);
   <link rel="canonical" href={canonicalUrl} />
 
   {alternates.map(({ lang: alternateLang, pathname }) => {
+    const normalizedLang = alternateLang.toLowerCase();
+    const href = new URL(pathname, baseDomain).toString();
+
+    if (normalizedLang === 'x-default') {
+      return <link rel="alternate" hreflang="x-default" href={href} />;
+    }
+
     const alternateDefinition = resolveLocaleDefinition(alternateLang);
     const hreflang = alternateDefinition.langTag ?? alternateDefinition.code;
-    return (
-      <link rel="alternate" hreflang={hreflang} href={new URL(pathname, baseDomain).toString()} />
-    );
+
+    return <link rel="alternate" hreflang={hreflang} href={href} />;
   })}
 
   {prev && <link rel="prev" href={prev} />}

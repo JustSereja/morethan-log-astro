@@ -46,12 +46,40 @@ if (!entry) {
 }
 
 const translations = await getPageTranslations(entry);
-const alternates = translations
-  .filter((candidate) => candidate.id !== entry.id)
-  .map((candidate) => ({
-    lang: getPageLanguage(candidate),
-    url: new URL(getPagePermalink(candidate), siteConfig.siteUrl).toString(),
+
+const alternates = (() => {
+  const linkMap = new Map<string, string>();
+
+  const registerAlternate = (localeCode: string, permalink: string) => {
+    if (!localeCode || !permalink) {
+      return;
+    }
+
+    if (!linkMap.has(localeCode)) {
+      const href = new URL(permalink, siteConfig.siteUrl).toString();
+      linkMap.set(localeCode, href);
+    }
+  };
+
+  translations.forEach((candidate) => {
+    registerAlternate(getPageLanguage(candidate), getPagePermalink(candidate));
+  });
+
+  const currentLang = getPageLanguage(entry);
+  registerAlternate(currentLang, getPagePermalink(entry));
+
+  const entries = Array.from(linkMap.entries()).map(([localeCode, href]) => ({
+    lang: localeCode,
+    url: href,
   }));
+
+  const defaultHref = linkMap.get(DEFAULT_LOCALE) ?? linkMap.get(currentLang);
+  if (defaultHref) {
+    entries.push({ lang: 'x-default', url: defaultHref });
+  }
+
+  return entries;
+})();
 
 const { Content } = await entry.render();
 ---

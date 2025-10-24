@@ -1,10 +1,10 @@
-import { getCollection } from 'astro:content';
 import siteConfig from '@config/site';
 import {
   getPostCategory,
   getPostImage,
   getPostLanguage,
   getPostPermalink,
+  getPosts,
 } from '@lib/content';
 import { DEFAULT_LOCALE } from '@lib/language';
 
@@ -26,10 +26,9 @@ function cleanMarkdown(body) {
 }
 
 export async function GET() {
-  const posts = await getCollection('posts');
-  const visiblePosts = posts.filter((entry) => isDevelopment || !entry.data.draft);
+  const posts = await getPosts({ includeDrafts: isDevelopment });
 
-  const payload = visiblePosts.map((entry) => ({
+  const payload = posts.map((entry) => ({
     title: entry.data.h1 ?? entry.data.title ?? 'Untitled',
     description: entry.data.description ?? '',
     url: new URL(getPostPermalink(entry), siteConfig.siteUrl).toString(),

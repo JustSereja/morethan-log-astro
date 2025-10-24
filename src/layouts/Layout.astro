@@ -69,15 +69,54 @@ const parsedAlternates = alternates.map(({ lang, url }) => {
   }
 });
 
+const normalizeAlternatePath = (value: string): string => {
+  if (!value) {
+    return '/';
+  }
+
+  try {
+    const url = new URL(value, baseDomain);
+    return ensureTrailingSlash(url.pathname);
+  } catch {
+    const prefixed = value.startsWith('/') ? value : `/${value}`;
+    return ensureTrailingSlash(prefixed);
+  }
+};
+
+const alternateCandidates = [{ lang, pathname }, ...parsedAlternates];
+const seenAlternateLangs = new Set<string>();
+const normalizedAlternates = alternateCandidates.reduce<
+  Array<{ lang: string; pathname: string }>
+>((acc, { lang: candidateLang, pathname: candidatePath }) => {
+  const normalizedLang = candidateLang.toLowerCase();
+  if (seenAlternateLangs.has(normalizedLang)) {
+    return acc;
+  }
+
+  seenAlternateLangs.add(normalizedLang);
+  acc.push({
+    lang: candidateLang,
+    pathname: normalizeAlternatePath(candidatePath),
+  });
+  return acc;
+}, []);
+
 const alternateMap = new Map<string, string>();
 
-parsedAlternates.forEach(({ lang: alternateLang, pathname }) => {
-  const normalizedPath = ensureTrailingSlash(pathname);
-  const definition = resolveLocaleDefinition(alternateLang);
+const registerAlternateVariants = (langKey: string, normalizedPath: string) => {
+  if (!normalizedPath) {
+    return;
+  }
 
+  if (langKey.toLowerCase() === 'x-default') {
+    alternateMap.set('x-default', normalizedPath);
+    return;
+  }
+
+  const definition = resolveLocaleDefinition(langKey);
   const variants = [
-    alternateLang,
-    alternateLang.toLowerCase(),
+    langKey,
+    langKey.toLowerCase(),
     definition.code,
     definition.code.toLowerCase(),
     definition.langTag,
@@ -87,7 +126,32 @@ parsedAlternates.forEach(({ lang: alternateLang, pathname }) => {
   variants.forEach((variant) => {
     alternateMap.set(variant, normalizedPath);
   });
+};
+
+normalizedAlternates.forEach(({ lang: alternateLang, pathname }) => {
+  registerAlternateVariants(alternateLang, pathname);
 });
+
+const hasXDefaultAlternate = normalizedAlternates.some(
+  ({ lang: alternateLang }) => alternateLang.toLowerCase() === 'x-default',
+);
+
+if (!hasXDefaultAlternate) {
+  const defaultLocaleCodeLower = DEFAULT_LOCALE.toLowerCase();
+  const defaultLocalePath =
+    alternateMap.get(DEFAULT_LOCALE) ??
+    alternateMap.get(defaultLocaleCodeLower) ??
+    null;
+
+  const fallbackPath =
+    defaultLocalePath ?? (normalizedAlternates[0]?.pathname ?? pathname);
+
+  registerAlternateVariants('x-default', fallbackPath);
+  normalizedAlternates.push({
+    lang: 'x-default',
+    pathname: fallbackPath,
+  });
+}
 
 function getLocalePath(targetLang: string): string {
   const mapped = alternateMap.get(targetLang);
@@ -279,7 +343,7 @@ const navItems = await resolveNavItems();
     description={metaDescription}
     keywords={keywords}
     canonicalUrl={canonicalUrl}
-    alternates={parsedAlternates}
+    alternates={normalizedAlternates}
     prev={prevAbsolute}
     next={nextAbsolute}
     ogImage={ogImage}

@@ -82,7 +82,7 @@ function derivePostMeta(entry: PostEntry) {
   const segments = entry.slug.split('/');
   const [lang = DEFAULT_LOCALE, category = 'blog', ...rest] = segments;
   const fallbackKey = rest.length > 0 ? rest.join('/') : entry.id;
-  const translationKey = entry.data.translationKey ?? fallbackKey;
+  const translationKey = fallbackKey;
 
   const fallbackSlug =
     rest.length > 0 ? rest[rest.length - 1] : entry.slug.split('/').pop() ?? entry.id;
@@ -94,7 +94,7 @@ function derivePageMeta(entry: PageEntry) {
   const segments = entry.slug.split('/');
   const [lang = DEFAULT_LOCALE, ...rest] = segments;
   const fallbackKey = rest.length > 0 ? rest.join('/') : entry.id;
-  const translationKey = entry.data.translationKey ?? fallbackKey;
+  const translationKey = fallbackKey;
 
   const fallbackSlug =
     rest.length > 0 ? rest[rest.length - 1] : entry.slug.split('/').pop() ?? entry.id;
@@ -103,12 +103,54 @@ function derivePageMeta(entry: PageEntry) {
   return { lang, translationKey, fallbackSlug, fallbackPath };
 }
 
+function buildDraftTranslationKeySet<T>(
+  entries: T[],
+  getKey: (entry: T) => string,
+): Set<string> {
+  const draftKeys = new Set<string>();
+
+  for (const entry of entries as Array<T & { data: { draft?: boolean } }>) {
+    if (entry?.data?.draft) {
+      draftKeys.add(getKey(entry));
+    }
+  }
+
+  return draftKeys;
+}
+
+function filterDraftedEntries<T>(
+  entries: T[],
+  getKey: (entry: T) => string,
+  includeDrafts = false,
+): T[] {
+  if (includeDrafts) {
+    return entries;
+  }
+
+  const draftKeys = buildDraftTranslationKeySet(entries, getKey);
+
+  return (entries as Array<T & { data: { draft?: boolean } }>).filter((entry) => {
+    if (entry.data?.draft) {
+      return false;
+    }
+
+    return !draftKeys.has(getKey(entry));
+  });
+}
+
+const filterDraftedPostEntries = (entries: PostEntry[], includeDrafts = false) =>
+  filterDraftedEntries(entries, getPostTranslationKey, includeDrafts);
+
+const filterDraftedPageEntries = (entries: PageEntry[], includeDrafts = false) =>
+  filterDraftedEntries(entries, getPageTranslationKey, includeDrafts);
+
 export async function getPosts(options: GetPostsOptions = {}) {
   const { lang, category, includeDrafts = false } = options;
 
-  const entries = await getCollection('posts', ({ data }) => includeDrafts || !data.draft);
+  const entries = await getCollection('posts');
+  const publishedEntries = filterDraftedPostEntries(entries, includeDrafts);
 
-  const filtered = entries.filter((entry) => {
+  const filtered = publishedEntries.filter((entry) => {
     const meta = derivePostMeta(entry);
     const categoryConfig = siteConfig.categories[meta.category];
 
@@ -126,8 +168,9 @@ export async function getPageByTranslationKey(
   lang: string,
 ) {
   const entries = await getCollection('pages');
+  const publishedEntries = filterDraftedPageEntries(entries);
   return (
-    entries.find((entry) => {
+    publishedEntries.find((entry) => {
       const meta = derivePageMeta(entry);
       return meta.translationKey === translationKey && meta.lang === lang;
     }) ?? null
@@ -160,8 +203,9 @@ export function getPostTranslationKey(entry: PostEntry) {
 
 export async function getPostTranslations(entry: PostEntry) {
   const translationKey = getPostTranslationKey(entry);
-  const allTranslations = await getCollection('posts', ({ data }) => !data.draft);
-  return allTranslations
+  const allTranslations = await getCollection('posts');
+  const publishedEntries = filterDraftedPostEntries(allTranslations);
+  return publishedEntries
     .filter((candidate) => {
       if (getPostTranslationKey(candidate) !== translationKey) return false;
       const categoryConfig = siteConfig.categories[getPostCategory(candidate)];
@@ -214,9 +258,10 @@ export function getPagePermalink(entry: PageEntry) {
 
 export async function getPageTranslations(entry: PageEntry) {
   const translationKey = getPageTranslationKey(entry);
-  const allTranslations = await getCollection('pages', ({ data }) => !data.draft);
+  const allTranslations = await getCollection('pages');
+  const publishedEntries = filterDraftedPageEntries(allTranslations);
 
-  return allTranslations.filter(
+  return publishedEntries.filter(
     (candidate) => getPageTranslationKey(candidate) === translationKey,
   );
 }
@@ -332,8 +377,9 @@ export async function findTopLevelPage(options: {
 
 export async function getTopLevelPageDescriptors(): Promise<TopLevelPageDescriptor[]> {
   const pages = await getCollection('pages');
+  const publishedPages = filterDraftedPageEntries(pages);
 
-  return pages
+  return publishedPages
     .map((entry) => {
       const slug = getPageSlug(entry);
       if (!slug || slug.includes('/')) {
