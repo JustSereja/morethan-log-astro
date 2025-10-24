@@ -1,7 +1,7 @@
 {
   "name": "morethan-log-astro",
   "type": "module",
-  "version": "2.0.0",
+  "version": "2.4.0",
   "description": "A modern, customizable blog template built with Astro - fast, responsive, and multilingual",
   "author": "Sereja <demo@morethan-log.com>",
   "license": "MIT",
@@ -44,9 +44,13 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/mdx": "^4.3.8",
+    "@astrojs/react": "^4.4.0",
     "@astrojs/rss": "^4.0.12",
     "@astrojs/sitemap": "^3.6.0",
-    "astro": "^5.14.8"
+    "astro": "^5.14.8",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "astro-compress": "^2.3.8",

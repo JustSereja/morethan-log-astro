@@ -1,0 +1,33 @@
+---
+title: 'Interactive React Components in Astro'
+h1: 'Interactive React Components in Astro'
+description: 'Demonstrating how React islands hydrate inside this Astro blog template.'
+date: '2025-01-15'
+---
+import DemoCounter from '@components/islands/DemoCounter';
+
+Astro treats every page as static HTML by default, but you can opt-in to client-side
+interactivity by hydrating framework components on demand. This article embeds the new
+`<DemoCounter />` React component directly inside markdown content so you can see the
+experience your readers get.
+
+## Hydrated React Island
+
+The counter below hydrates immediately on page load thanks to the `client:load`
+directive. Change the step size, click the buttons, and watch the state update in real
+time—the markup started static, and React now manages it in the browser.
+
+<DemoCounter client:load initial={3} />
+
+### How It Works
+
+- We installed the React integration (`@astrojs/react`) and enabled it in the Astro config.
+- MDX support (`@astrojs/mdx`) lets us import framework components straight into content
+  files like this one.
+- The component lives in `src/components/islands/DemoCounter/`, exposing metadata for the
+  automatic registry and using regular React hooks.
+
+Because islands only hydrate when instructed, you can mix fast static content with
+dynamic experiences without turning the whole page into an SPA. Try scrolling away and
+back again—the component stays interactive because React is now in control of just that
+fragment.

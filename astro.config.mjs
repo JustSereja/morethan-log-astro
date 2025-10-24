@@ -1,5 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
+import react from '@astrojs/react';
+import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import purgecss from 'astro-purgecss';
 import siteConfig from './src/config/site.ts';
@@ -16,6 +18,8 @@ export default defineConfig({
     locales: languages,
   },
   integrations: [
+    react(),
+    mdx(),
     purgecss({
       content: [
         './src/**/*.astro',
@@ -23,6 +27,7 @@ export default defineConfig({
         './src/**/*.mdx',
         './src/**/*.js',
         './src/**/*.ts',
+        './src/**/*.tsx',
       ],
       safelist: [
         'medium-zoom-image--opened',

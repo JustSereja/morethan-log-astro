@@ -318,6 +318,13 @@ src/content/posts/en/blog/my-post.md   # English
 src/content/posts/ru/blog/my-post.md   # Russian
 ```
 
+### MDX & Interactive Islands
+
+- Posts and pages can be authored as `.mdx` files—the same frontmatter schema applies, so drafts, permalinks, and AI flags continue to work exactly like `.md`.
+- React islands live in `src/components/islands/**`. Each island exports its component as the default export and can optionally provide metadata via an `island` named export.
+- The registry automatically discovers every island folder. Import them directly from their folder (e.g. `import DemoCounter from '@components/islands/DemoCounter';`) or reuse them across multiple posts without touching a central index.
+- When hydrating inside MDX, attach the usual directives (`<DemoCounter client:load initial={3} />`) and Astro will stream the static HTML before React takes over.
+
 ### Language Support
 
 The template supports both multilingual and single-language content:

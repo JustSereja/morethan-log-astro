@@ -1,0 +1,129 @@
+.demo-counter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.25rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+  background: var(--context-bg);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.demo-counter:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+}
+
+.demo-counter__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 7.5rem;
+}
+
+.demo-counter__eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-color-highlight);
+}
+
+.demo-counter__value {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--highlight-color);
+}
+
+.demo-counter__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.demo-counter__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: var(--secondary-color);
+}
+
+.demo-counter__select {
+  appearance: none;
+  padding: 0.35rem 0.85rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--border-color);
+  background: var(--secondary-bg);
+  color: var(--main-color);
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.demo-counter__select:focus-visible {
+  outline: 2px solid rgba(0, 0, 0, 0);
+  border-color: var(--highlight-color);
+  box-shadow: 0 0 0 4px rgba(235, 134, 29, 0.16);
+}
+
+.demo-counter__buttons {
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+.demo-counter__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.95rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--highlight-color);
+  background: var(--highlight-color);
+  color: #1c1c1c;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.demo-counter__button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.14);
+}
+
+.demo-counter__button:active {
+  transform: none;
+  box-shadow: none;
+}
+
+.demo-counter__button--ghost {
+  background: transparent;
+  color: var(--main-color);
+}
+
+.demo-counter__button--ghost:hover {
+  background: rgba(235, 134, 29, 0.08);
+}
+
+@media (max-width: 640px) {
+  .demo-counter {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .demo-counter__controls {
+    justify-content: center;
+    margin-left: 0;
+  }
+}
+
+html.dark-mode .demo-counter {
+  background: var(--secondary-bg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}

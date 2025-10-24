@@ -16,6 +16,7 @@ function cleanMarkdown(body) {
   return body
     .replace(/!\[[^\]]*]\([^)]*\)/g, '')
     .replace(/\[[^\]]*]\([^)]*\)/g, '')
+    .replace(/<[^>]+>/g, '')
     .replace(/^#+\s+(.*)/gm, '$1')
     .replace(/\*\*(.*?)\*\*/g, '$1')
     .replace(/\*(.*?)\*/g, '$1')
