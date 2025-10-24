@@ -1,7 +1,7 @@
 {
   "name": "morethan-log-astro",
   "type": "module",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "A modern, customizable blog template built with Astro - fast, responsive, and multilingual",
   "author": "Sereja <demo@morethan-log.com>",
   "license": "MIT",
