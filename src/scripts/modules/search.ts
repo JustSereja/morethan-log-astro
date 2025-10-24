@@ -15,6 +15,7 @@ type SearchPost = {
   icon?: string;
   imageUrl?: string;
   date?: string;
+  publishedAt?: string;
 };
 
 const SEARCH_INPUT_SELECTOR = '.search input';
@@ -27,7 +28,29 @@ const SEARCH_TOGGLE_SELECTOR = '.header__search-toggle';
 type SearchWindow = Window & {
   __SEARCH_CATEGORY_SEGMENTS__?: unknown;
   __ASTRO_BASE_PATH__?: unknown;
+  __SEARCH_STRINGS__?: Partial<SearchStrings>;
+  __SEARCH_CATEGORY_LABELS__?: Record<string, string>;
 };
+
+type SearchStrings = {
+  resultsHeading: string;
+  noResults: string;
+  allPosts: string;
+};
+
+const DEFAULT_SEARCH_STRINGS: SearchStrings = {
+  resultsHeading: 'Search results',
+  noResults: 'No results found',
+  allPosts: 'All posts',
+};
+
+const escapeHtml = (value: string): string =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 
 const getCategorySlugs = (): string[] => {
   if (typeof window === 'undefined') {
@@ -63,6 +86,42 @@ const getBasePath = (): string => {
 
 let postsCache: SearchPost[] | null = null;
 let debounceTimer: number | undefined;
+
+const getSearchStrings = (): SearchStrings => {
+  if (typeof window === 'undefined') {
+    return DEFAULT_SEARCH_STRINGS;
+  }
+
+  const raw = (window as SearchWindow).__SEARCH_STRINGS__;
+  if (!raw) {
+    return DEFAULT_SEARCH_STRINGS;
+  }
+
+  return {
+    resultsHeading: typeof raw.resultsHeading === 'string' && raw.resultsHeading.length
+      ? raw.resultsHeading
+      : DEFAULT_SEARCH_STRINGS.resultsHeading,
+    noResults: typeof raw.noResults === 'string' && raw.noResults.length
+      ? raw.noResults
+      : DEFAULT_SEARCH_STRINGS.noResults,
+    allPosts: typeof raw.allPosts === 'string' && raw.allPosts.length
+      ? raw.allPosts
+      : DEFAULT_SEARCH_STRINGS.allPosts,
+  };
+};
+
+const getCategoryLabels = (): Record<string, string> => {
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
+  const raw = (window as SearchWindow).__SEARCH_CATEGORY_LABELS__;
+  if (!raw || typeof raw !== 'object') {
+    return {};
+  }
+
+  return raw;
+};
 
 const loadPosts = async (): Promise<SearchPost[]> => {
   if (postsCache) {
@@ -100,19 +159,28 @@ const renderResults = (
   resultsContainer: HTMLElement,
   contextCategory: string | null,
 ) => {
-  const categoryTitle = (contextCategory ?? 'all').toUpperCase();
+  const strings = getSearchStrings();
+  const categoryLabels = getCategoryLabels();
+  const categoryTitle = contextCategory
+    ? categoryLabels[contextCategory] ?? contextCategory
+    : strings.allPosts;
+
+  const headerTitle = categoryTitle
+    ? `${strings.resultsHeading}: ${categoryTitle}`
+    : strings.resultsHeading;
+
   const header = `
 <div class="filter">
   <div class="filter__categories categories">
     <div class="categories__wrapper">
-      <h2 class="categories__wrapper">${categoryTitle}: Search Results</h2>
+      <h2 class="categories__wrapper">${escapeHtml(headerTitle)}</h2>
     </div>
     <div class="categories__content"></div>
   </div>
 </div>`;
 
   if (!posts.length) {
-    resultsContainer.innerHTML = `${header}<div class="no-posts">No results found</div>`;
+    resultsContainer.innerHTML = `${header}<div class="no-posts">${escapeHtml(strings.noResults)}</div>`;
     return;
   }
 

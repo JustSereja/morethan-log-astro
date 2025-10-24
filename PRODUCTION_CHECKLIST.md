@@ -41,7 +41,7 @@ Edit `src/config/site.ts`:
 - [ ] Update `description` (both English and Russian)
 - [ ] Replace `"https://morethan-log-astro.sereja.com"` with your actual domain
 - [ ] Update author information (currently: "Sereja", "demo@morethan-log.com")
-- [ ] Add your social media links or remove unused ones
+- [ ] Update `contactLinks` with your social or contact profiles
 - [ ] Configure features (dark mode, search, RSS, etc.)
 - [ ] Update categories or add new ones
 - [ ] Set your Google Analytics ID (if using)

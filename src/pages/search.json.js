@@ -7,6 +7,7 @@ import {
   getPosts,
 } from '@lib/content';
 import { DEFAULT_LOCALE } from '@lib/language';
+import { formatDate } from '@lib/format';
 
 const isDevelopment = import.meta.env.DEV;
 const MAX_CONTENT_LENGTH = 400;
@@ -33,7 +34,8 @@ export async function GET() {
     title: entry.data.h1 ?? entry.data.title ?? 'Untitled',
     description: entry.data.description ?? entry.data.announcement ?? '',
     url: new URL(getPostPermalink(entry), siteConfig.siteUrl).toString(),
-    date: entry.data.date.toISOString(),
+    date: formatDate(entry.data.date, getPostLanguage(entry)),
+    publishedAt: entry.data.date.toISOString(),
     content: (() => {
       const raw = cleanMarkdown(entry.body);
       if (!raw) {

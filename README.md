@@ -145,20 +145,33 @@ const siteConfig: SiteConfig = {
 export default siteConfig;
 ```
 
-### Social Links
+### Contact & Social Links
 
-Add your social media profiles:
+Add any contact or social profiles:
 
 ```typescript
-socialLinks: {
-  en: {
-    github: 'https://github.com/yourusername',
-    twitter: 'https://x.com/yourusername',
+contactLinks: [
+  {
+    id: 'github',
+    label: {
+      en: 'GitHub',
+      ru: 'GitHub',
+    },
+    url: {
+      en: 'https://github.com/yourusername',
+      ru: 'https://github.com/yourusername-ru',
+    },
+    icon: '🐙',
   },
-  ru: {
-    github: 'https://github.com/yourusername-ru',
+  {
+    id: 'newsletter',
+    label: {
+      en: 'Newsletter',
+      ru: 'Рассылка',
+    },
+    url: 'https://example.com/newsletter',
   },
-}
+];
 ```
 
 ### Categories
@@ -416,24 +429,36 @@ export const ui = {
 
 Create new pages in `src/pages/` using `.astro` or `.md` files.
 
-### Language-Specific Social Links and Author Names
+### Language-Specific Contact Links and Author Names
 
-The template now supports different social links and author names for each language:
+The template now supports fully configurable contact/social links and author names for each language:
 
-1. **Language-Specific Social Links**: Configure different social media profiles for each language in `src/config/site.ts`:
+1. **Contact & Social Links**: Configure any set of links in `src/config/site.ts`. Each entry can localize its label and URL, and optionally define an icon (emoji) or raw SVG:
    ```javascript
-   socialLinks: {
-     en: {
-       github: "https://github.com/EnglishUsername",
-       twitter: "https://x.com/EnglishHandle",
-       // ... other social links
+   contactLinks: [
+     {
+       id: "github",
+       label: {
+         en: "GitHub",
+         ru: "GitHub"
+       },
+       url: {
+         en: "https://github.com/EnglishUsername",
+         ru: "https://github.com/RussianUsername"
+       },
+       icon: "🐙"
      },
-     ru: {
-       github: "https://github.com/RussianUsername",
-       twitter: "https://x.com/RussianHandle",
-       // ... other social links
+     {
+       id: "portfolio",
+       label: {
+         en: "Portfolio",
+         ru: "Портфолио"
+       },
+       url: "https://example.com",
+       iconSvg: "<svg ...>...</svg>"
      }
-   }
+     // ...other links
+   ]
    ```
 
 2. **Language-Specific Author Names**: Set different author names for each language:
@@ -534,6 +559,6 @@ npm run build
 This sequence:
 - Brings in the latest template logic, layouts, scripts, and assets.
 - Leaves `src/content/**` untouched, so your posts and pages stay intact.
-- Restores your own `src/config/site.ts` and `src/config/locales.ts`, keeping personal branding, locale metadata, social links, and other secrets.
+- Restores your own `src/config/site.ts` and `src/config/locales.ts`, keeping personal branding, locale metadata, contact links, and other secrets.
 
 Review `git status`, commit the updated files, and (optionally) create a tag for the new version of your site.

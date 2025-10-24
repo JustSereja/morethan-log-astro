@@ -1,7 +1,10 @@
 ---
 interface ContactLink {
+  id?: string;
   name: string;
   url: string;
+  icon?: string;
+  iconSvg?: string;
 }
 
 interface ContactLinksProps {
@@ -31,7 +34,18 @@ const classNames = ['contact', ...baseClasses.filter(Boolean)];
   </div>
   <div class="box-links contact__box-links">
     {links.map((link) => (
-      <a href={link.url} rel="noreferrer" target="_blank" class="box-links__link">
+      <a
+        href={link.url}
+        rel="noreferrer"
+        target="_blank"
+        class="box-links__link"
+        data-contact-id={link.id ?? undefined}
+      >
+        {link.iconSvg ? (
+          <span class="icon" aria-hidden="true" set:html={link.iconSvg}></span>
+        ) : link.icon ? (
+          <span class="icon" aria-hidden="true">{link.icon}</span>
+        ) : null}
         <span class="box-links__link-name">{link.name}</span>
       </a>
     ))}

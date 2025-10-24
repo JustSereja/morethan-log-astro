@@ -43,7 +43,21 @@ export interface SiteSeoConfig {
   googleAnalytics: string;
 }
 
-export type SocialLinkConfig = Partial<Record<LocaleCode, Record<string, string>>>;
+export interface SiteProjectLink {
+  id: string;
+  url: string;
+  label: LocaleRecord<string>;
+  icon?: string;
+  iconSvg?: string;
+}
+
+export interface SiteContactLink {
+  id: string;
+  label: LocaleRecord<string>;
+  url: string | LocaleRecord<string>;
+  icon?: string;
+  iconSvg?: string;
+}
 
 export interface SiteConfig {
   siteUrl: string;
@@ -52,7 +66,8 @@ export interface SiteConfig {
   author: SiteAuthorConfig;
   postsPerPage: number;
   featuredImageFallback: string;
-  socialLinks: SocialLinkConfig;
+  contactLinks: SiteContactLink[];
+  projects: SiteProjectLink[];
   categories: Record<string, SiteCategoryConfig>;
   navigation: SiteNavigationItemConfig[];
   features: SiteFeatureToggles;
