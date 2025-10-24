@@ -1,11 +1,12 @@
 ---
+const AUTHOR_NAME = 'Sereja';
+const AUTHOR_URL = 'https://sereja.com/';
+
 interface FooterCopyProps {
-  authorName: string;
-  authorUrl: string;
   className?: string | string[] | Record<string, boolean>;
 }
 
-const { authorName, authorUrl, className }: FooterCopyProps = Astro.props;
+const { className }: FooterCopyProps = Astro.props;
 
 const baseClasses = Array.isArray(className)
   ? className
@@ -23,8 +24,8 @@ const currentYear = new Date().getFullYear();
 <div class={classNames.join(' ')}>
   <div class="footer__copy">
     Made with <span class="footer__heart">♥</span> by{' '}
-    <a href={authorUrl} target="_blank" rel="noopener noreferrer">
-      {authorName}
+    <a href={AUTHOR_URL} target="_blank" rel="noopener noreferrer">
+      {AUTHOR_NAME}
     </a>{' '}
     • {currentYear}
   </div>
