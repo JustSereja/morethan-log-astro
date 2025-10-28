@@ -46,7 +46,7 @@ const aboutHref = await (async () => {
   return translatePath('/about');
 })();
 
-const publishedDate = formatDate(entry.data.date, lang);
+const publishedDate = formatDate(entry.data.date, lang, 'compact');
 const heroImage = getPostImage(entry);
 const categoryKey = getPostCategory(entry);
 const categoryConfig = getCategoryConfig(categoryKey);

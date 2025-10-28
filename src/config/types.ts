@@ -77,6 +77,7 @@ export interface SiteConfig {
   dateFormats: LocaleRecord<{
     locale: string;
     options: Intl.DateTimeFormatOptions;
+    compactOptions?: Intl.DateTimeFormatOptions;
   }>;
 }
 

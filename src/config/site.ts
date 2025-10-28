@@ -243,6 +243,11 @@ const siteConfig: SiteConfig = {
     en: {
       locale: 'en-US',
       options: {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      },
+      compactOptions: {
         year: '2-digit',
         month: 'short',
         day: 'numeric',
@@ -251,6 +256,11 @@ const siteConfig: SiteConfig = {
     ru: {
       locale: 'ru-RU',
       options: {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      },
+      compactOptions: {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
