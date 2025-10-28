@@ -6,7 +6,6 @@
   "wrap_attributes": "auto",
   "wrap_line_length": 0,
   "end_with_newline": true,
-  "inline": [],
   "css": {
     "indent_size": 2
   },
