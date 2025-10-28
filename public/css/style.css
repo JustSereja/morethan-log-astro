@@ -677,7 +677,7 @@ a {
 
 .text-block pre code {
     display: block;
-    padding: 1.5em;
+    padding: 1.25em 1.5em 1.25em 1.25em;
     background: transparent;
     color: var(--code-block-text, #d4d4d4);
     font-size: inherit;
