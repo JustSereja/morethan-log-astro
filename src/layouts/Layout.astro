@@ -290,6 +290,18 @@ const searchStrings = {
   allPosts: t('ui.all_posts'),
 };
 
+const astroBasePath = typeof basePath === 'string' && basePath.length ? basePath : '/';
+const localeBootstrap = [
+  `window.__LOCALE_CONFIG__=${JSON.stringify({
+    defaultLanguage: DEFAULT_LOCALE,
+    languages: siteConfig.languages,
+  })};`,
+  `window.__SEARCH_CATEGORY_SEGMENTS__=${JSON.stringify(categorySegments)};`,
+  `window.__ASTRO_BASE_PATH__=${JSON.stringify(astroBasePath)};`,
+  `window.__SEARCH_STRINGS__=${JSON.stringify(searchStrings)};`,
+  `window.__SEARCH_CATEGORY_LABELS__=${JSON.stringify(localizedCategoryLabels)};`,
+].join('');
+
 const twitterHandle = siteConfig.seo.twitterHandle
   ? `@${siteConfig.seo.twitterHandle.replace(/^@/, '')}`
   : undefined;
@@ -419,28 +431,7 @@ const navItems = await resolveNavItems();
           <slot />
         </div>
       </main>
-      <script
-        is:inline
-        define:vars={{
-          localeConfig: { defaultLanguage: DEFAULT_LOCALE, languages: siteConfig.languages },
-          searchCategorySegments: categorySegments,
-          searchStrings,
-          categoryLabels: localizedCategoryLabels,
-          basePath,
-        }}
-      >
-        window.__LOCALE_CONFIG__ = localeConfig;
-        window.__SEARCH_CATEGORY_SEGMENTS__ = Array.isArray(searchCategorySegments)
-          ? searchCategorySegments
-          : [];
-        window.__ASTRO_BASE_PATH__ =
-          typeof basePath === 'string' && basePath.length ? basePath : '/';
-        window.__SEARCH_STRINGS__ = searchStrings;
-        window.__SEARCH_CATEGORY_LABELS__ =
-          typeof categoryLabels === 'object' && categoryLabels !== null
-            ? categoryLabels
-            : {};
-      </script>
+      <script is:inline set:html={localeBootstrap}></script>
     </div>
   </body>
 </html>

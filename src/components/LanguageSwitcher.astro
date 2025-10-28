@@ -74,12 +74,8 @@ const toggleAriaLabel = `Change language, current ${currentLanguageName}`;
     aria-label={toggleAriaLabel}
     title={currentLanguageName}
   >
-    <span class="language-switcher__label" aria-hidden="true">
-      {currentOption.displayLabel}
-    </span>
-    <span class="language-switcher__label-text">
-      {currentOption.label}
-    </span>
+    <span class="language-switcher__label" aria-hidden="true">{currentOption.displayLabel}</span>
+    <span class="language-switcher__label-text">{currentOption.label}</span>
   </button>
   <ul class="language-switcher__menu" role="listbox" hidden>
     {normalizedOptions.map((option) => (
@@ -97,12 +93,8 @@ const toggleAriaLabel = `Change language, current ${currentLanguageName}`;
           aria-label={`Switch language to ${option.label}`}
           title={option.isAvailable ? option.label : 'Opens language home'}
         >
-          <span class="language-switcher__item-flag" aria-hidden="true">
-            {option.displayLabel}
-          </span>
-          <span class="language-switcher__item-label">
-            {option.label}
-          </span>
+          <span class="language-switcher__item-flag" aria-hidden="true">{option.displayLabel}</span>
+          <span class="language-switcher__item-label">{option.label}</span>
           {!option.isAvailable && (
             <span class="language-switcher__item-hint" aria-hidden="true">↺</span>
           )}

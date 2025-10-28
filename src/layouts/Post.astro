@@ -168,42 +168,13 @@ const alternates = (() => {
   {headings.length > 0 && <FloatingTOC headings={headings} lang={lang} />}
 
   {siteConfig.features.imageLightbox && (
-    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
-      <span class="close">&times;</span>
-      <img class="lightbox-content" />
-    </div>
-  )}
-
-  {siteConfig.features.imageLightbox && (
-    <script is:inline define:vars={{ siteUrl: siteConfig.siteUrl }}>
-      window.closeLightbox = function () {
-        document.getElementById('lightbox').style.display = 'none';
-      };
-
-      document.addEventListener('DOMContentLoaded', function () {
-        const links = document.querySelectorAll('a');
-
-        links.forEach((link) => {
-          const href = link.getAttribute('href') || '';
-          if (
-            !href.startsWith(siteUrl) &&
-            !href.startsWith('/') &&
-            !href.startsWith('#')
-          ) {
-            link.setAttribute('target', '_blank');
-            link.setAttribute('rel', 'noopener noreferrer');
-          }
-        });
-
-        document.querySelectorAll('img').forEach(function (img) {
-          img.onclick = function () {
-            const lightboxImage = document.querySelector('.lightbox-content');
-            lightboxImage.src = this.src;
-            document.getElementById('lightbox').style.display = 'flex';
-          };
-        });
-      });
-    </script>
+    <>
+      <div id="lightbox" class="lightbox" data-site-url={siteConfig.siteUrl}>
+        <span class="close">&times;</span>
+        <img class="lightbox-content" />
+      </div>
+      <script type="module" src="/js/lightbox.js"></script>
+    </>
   )}
 
   <style>

@@ -270,9 +270,7 @@ if (defaultAlternate) {
   <div class="content">
     <aside class="aside aside--left">
       <div class="tags tags--desktop">
-        <div class="tags__top">
-          <span class="icon">🏷️</span> {t('ui.categories')}
-        </div>
+        <div class="tags__top"><span class="icon">🏷️</span> {t('ui.categories')}</div>
         <CategoriesList />
       </div>
     </aside>
@@ -291,16 +289,15 @@ if (defaultAlternate) {
       <div id="search-results" style="display: none;"></div>
 
       <div class="tags tags--mob">
-        <div class="tags__top">
-          <span class="icon">🏷️</span> {t('ui.categories')}
-        </div>
+        <div class="tags__top"><span class="icon">🏷️</span> {t('ui.categories')}</div>
         <CategoriesList />
       </div>
 
       <div class="filter">
         <div class="filter__categories categories">
           <div class="categories__wrapper">
-            {categoryIcon} <h1 class="categories__wrapper">{currentCategoryLabel}</h1>
+            <span aria-hidden="true">{categoryIcon}</span>
+            <h1 class="categories__wrapper">{currentCategoryLabel}</h1>
           </div>
 
           {categoryDescription && (
@@ -320,17 +317,12 @@ if (defaultAlternate) {
           <a href={post.url} class="post">
             {shouldShowCategories && siteConfig.categories[post.category] && (
               <div class="post__category category">
-                <div class="category__item category__item--light-blue">
-                  {siteConfig.categories[post.category].icon}{' '}
-                  {post.categoryLabel}
-                </div>
+                <div class="category__item category__item--light-blue">{siteConfig.categories[post.category].icon} {post.categoryLabel}</div>
               </div>
             )}
 
             <div class="post__date_right category">
-              <div class="category__item date__item--light-blue">
-                {post.date}
-              </div>
+              <div class="category__item date__item--light-blue">{post.date}</div>
             </div>
 
             {post.image && (
@@ -353,27 +345,17 @@ if (defaultAlternate) {
 
       <div class="pagination">
         {page.url.prev ? (
-          <a class="pagination__link" href={page.url.prev}>
-            ← {t('ui.prev')}
-          </a>
+          <a class="pagination__link" href={page.url.prev}>← {t('ui.prev')}</a>
         ) : (
-          <span class="pagination__link disabled" style="visibility: hidden;">
-            {t('ui.prev')}
-          </span>
+          <span class="pagination__link disabled" style="visibility: hidden;">{t('ui.prev')}</span>
         )}
 
-        <span class="pagination__text">
-          {page.currentPage} / {page.lastPage}
-        </span>
+        <span class="pagination__text">{page.currentPage} / {page.lastPage}</span>
 
         {page.url.next ? (
-          <a class="pagination__link" href={page.url.next}>
-            {t('ui.next')} →
-          </a>
+          <a class="pagination__link" href={page.url.next}>{t('ui.next')} →</a>
         ) : (
-          <span class="pagination__link disabled" style="visibility: hidden;">
-            {t('ui.next')}
-          </span>
+          <span class="pagination__link disabled" style="visibility: hidden;">{t('ui.next')}</span>
         )}
       </div>
 
@@ -408,9 +390,7 @@ if (defaultAlternate) {
                 ) : project.icon ? (
                   <span class="icon" aria-hidden="true">{project.icon}</span>
                 ) : null}
-                <span class="box-links__link-name">
-                  {project.label}
-                </span>
+                <span class="box-links__link-name">{project.label}</span>
               </a>
             ))}
           </div>

@@ -69,6 +69,7 @@ const articleAuthor =
   Object.values(siteConfig.author.name)[0];
 const publishedTime = publishedAt ?? null;
 const modifiedTime = modifiedAt ?? publishedTime;
+
 ---
 <head>
   <meta charset="utf-8" />
@@ -81,27 +82,7 @@ const modifiedTime = modifiedAt ?? publishedTime;
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
 
-  <script is:inline>
-    {`(function() {
-  var storageKey = 'theme';
-  var darkClass = 'dark-mode';
-  var doc = document.documentElement;
-  try {
-    var stored = localStorage.getItem(storageKey);
-    var isStored = stored === 'dark' || stored === 'light';
-    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var mode = isStored ? stored : (prefersDark ? 'dark' : 'light');
-    if (mode === 'dark') {
-      doc.classList.add(darkClass);
-    } else {
-      doc.classList.remove(darkClass);
-    }
-    doc.dataset.theme = mode;
-  } catch (_) {
-    // ignore access issues
-  }
-})();`}
-  </script>
+  <script is:inline src="/js/theme.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

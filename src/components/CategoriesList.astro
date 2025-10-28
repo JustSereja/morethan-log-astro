@@ -40,8 +40,6 @@ const currentPath = ensureTrailingSlash(Astro.url.pathname);
 ---
 <div class="tags__list">
   {links.map((link) => (
-    <a href={link.href} data-active={link.href === currentPath ? 'true' : 'false'}>
-      {link.label} ({link.count})
-    </a>
+    <a href={link.href} data-active={link.href === currentPath ? 'true' : 'false'}>{link.label} ({link.count})</a>
   ))}
 </div>

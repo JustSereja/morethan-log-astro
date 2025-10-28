@@ -32,7 +32,7 @@
     "postbuild": "run-s copy:404 format:dist",
     "copy:404": "node scripts/copy-404.mjs",
     "format:dist": "run-s format:dist:html format:dist:css format:dist:js",
-    "format:dist:html": "js-beautify --config .jsbeautifyrc --replace \"dist/**/*.html\"",
+    "format:dist:html": "js-beautify --config .jsbeautifyrc --indent-scripts keep --content-unformatted script --replace \"dist/**/*.html\"",
     "format:dist:css": "run-s optimize:dist:css beautify:dist:css",
     "optimize:dist:css": "find dist -name \"*.css\" -type f -print0 | xargs -0 -I{} ./node_modules/.bin/csso \"{}\" --comments none --output \"{}\"",
     "beautify:dist:css": "js-beautify --config .jsbeautifyrc --type css --replace \"dist/**/*.css\"",
